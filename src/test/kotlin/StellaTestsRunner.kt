@@ -112,7 +112,7 @@ object StellaTestsRunner {
     }
 
     private fun StellaError.formatToString(parser: stellaParser) = buildString {
-        append("ERROR: $type")
+        append("ERROR: $type ")
         append(node.toStringTree(parser))
     }
 }
