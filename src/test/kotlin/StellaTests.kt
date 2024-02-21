@@ -1,4 +1,5 @@
 import org.junit.jupiter.api.Test
+import types.checker.StellaErrorType
 
 // DO NOT MODIFY THIS FILE MANUALLY
 // Edit TestsGenerator.kt instead
@@ -37,13 +38,13 @@ class OK_TESTS {
     fun simple_unit_test() {
         StellaTestsRunner.runOkTest("simple_unit")
     }
-    
+
 }
 @Suppress("ClassName")
 class ERROR_MISSING_MAIN_TESTS {
     @Test
     fun no_main_test() {
-        StellaTestsRunner.runBadTest(StellaTypeError.ERROR_MISSING_MAIN, "no_main")
+        StellaTestsRunner.runBadTest(StellaErrorType.ERROR_MISSING_MAIN, "no_main")
     }
     
 }
@@ -51,7 +52,7 @@ class ERROR_MISSING_MAIN_TESTS {
 class ERROR_MISSING_RECORD_FIELDS_TESTS {
     @Test
     fun simple_missing_fields_test() {
-        StellaTestsRunner.runBadTest(StellaTypeError.ERROR_MISSING_RECORD_FIELDS, "simple_missing_fields")
+        StellaTestsRunner.runBadTest(StellaErrorType.ERROR_MISSING_RECORD_FIELDS, "simple_missing_fields")
     }
     
 }
@@ -59,7 +60,7 @@ class ERROR_MISSING_RECORD_FIELDS_TESTS {
 class ERROR_UNEXPECTED_TUPLE_TESTS {
     @Test
     fun simple_unexpected_tuple_test() {
-        StellaTestsRunner.runBadTest(StellaTypeError.ERROR_UNEXPECTED_TUPLE, "simple_unexpected_tuple")
+        StellaTestsRunner.runBadTest(StellaErrorType.ERROR_UNEXPECTED_TUPLE, "simple_unexpected_tuple")
     }
     
 }
@@ -67,7 +68,7 @@ class ERROR_UNEXPECTED_TUPLE_TESTS {
 class ERROR_UNEXPECTED_RECORD_TESTS {
     @Test
     fun simple_unexpected_record_test() {
-        StellaTestsRunner.runBadTest(StellaTypeError.ERROR_UNEXPECTED_RECORD, "simple_unexpected_record")
+        StellaTestsRunner.runBadTest(StellaErrorType.ERROR_UNEXPECTED_RECORD, "simple_unexpected_record")
     }
     
 }
@@ -75,7 +76,7 @@ class ERROR_UNEXPECTED_RECORD_TESTS {
 class ERROR_NOT_A_RECORD_TESTS {
     @Test
     fun simple_not_a_record_test() {
-        StellaTestsRunner.runBadTest(StellaTypeError.ERROR_NOT_A_RECORD, "simple_not_a_record")
+        StellaTestsRunner.runBadTest(StellaErrorType.ERROR_NOT_A_RECORD, "simple_not_a_record")
     }
     
 }
@@ -83,7 +84,7 @@ class ERROR_NOT_A_RECORD_TESTS {
 class ERROR_UNEXPECTED_TUPLE_LENGTH_TESTS {
     @Test
     fun simple_unexpected_length_test() {
-        StellaTestsRunner.runBadTest(StellaTypeError.ERROR_UNEXPECTED_TUPLE_LENGTH, "simple_unexpected_length")
+        StellaTestsRunner.runBadTest(StellaErrorType.ERROR_UNEXPECTED_TUPLE_LENGTH, "simple_unexpected_length")
     }
     
 }
@@ -91,7 +92,7 @@ class ERROR_UNEXPECTED_TUPLE_LENGTH_TESTS {
 class ERROR_UNEXPECTED_RECORD_FIELDS_TESTS {
     @Test
     fun simple_unexpected_fields_test() {
-        StellaTestsRunner.runBadTest(StellaTypeError.ERROR_UNEXPECTED_RECORD_FIELDS, "simple_unexpected_fields")
+        StellaTestsRunner.runBadTest(StellaErrorType.ERROR_UNEXPECTED_RECORD_FIELDS, "simple_unexpected_fields")
     }
     
 }
@@ -99,7 +100,7 @@ class ERROR_UNEXPECTED_RECORD_FIELDS_TESTS {
 class ERROR_UNDEFINED_VARIABLE_TESTS {
     @Test
     fun simple_undefined_var_test() {
-        StellaTestsRunner.runBadTest(StellaTypeError.ERROR_UNDEFINED_VARIABLE, "simple_undefined_var")
+        StellaTestsRunner.runBadTest(StellaErrorType.ERROR_UNDEFINED_VARIABLE, "simple_undefined_var")
     }
     
 }
@@ -107,7 +108,7 @@ class ERROR_UNDEFINED_VARIABLE_TESTS {
 class ERROR_NOT_A_TUPLE_TESTS {
     @Test
     fun simple_not_a_tuple_test() {
-        StellaTestsRunner.runBadTest(StellaTypeError.ERROR_NOT_A_TUPLE, "simple_not_a_tuple")
+        StellaTestsRunner.runBadTest(StellaErrorType.ERROR_NOT_A_TUPLE, "simple_not_a_tuple")
     }
     
 }
@@ -115,7 +116,7 @@ class ERROR_NOT_A_TUPLE_TESTS {
 class ERROR_UNEXPECTED_TYPE_FOR_PARAMETER_TESTS {
     @Test
     fun simple_unexpected_parameter_test() {
-        StellaTestsRunner.runBadTest(StellaTypeError.ERROR_UNEXPECTED_TYPE_FOR_PARAMETER, "simple_unexpected_parameter")
+        StellaTestsRunner.runBadTest(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_PARAMETER, "simple_unexpected_parameter")
     }
     
 }
@@ -123,47 +124,47 @@ class ERROR_UNEXPECTED_TYPE_FOR_PARAMETER_TESTS {
 class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
     @Test
     fun simple_let_test() {
-        StellaTestsRunner.runBadTest(StellaTypeError.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "simple_let")
+        StellaTestsRunner.runBadTest(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "simple_let")
     }
     @Test
     fun false_return_test() {
-        StellaTestsRunner.runBadTest(StellaTypeError.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "false_return")
+        StellaTestsRunner.runBadTest(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "false_return")
     }
     @Test
     fun unexpected_unit_test() {
-        StellaTestsRunner.runBadTest(StellaTypeError.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "unexpected_unit")
+        StellaTestsRunner.runBadTest(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "unexpected_unit")
     }
     @Test
     fun unexpected_application_test() {
-        StellaTestsRunner.runBadTest(StellaTypeError.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "unexpected_application")
+        StellaTestsRunner.runBadTest(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "unexpected_application")
     }
     @Test
     fun is_zero_bool_test() {
-        StellaTestsRunner.runBadTest(StellaTypeError.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "is_zero_bool")
+        StellaTestsRunner.runBadTest(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "is_zero_bool")
     }
     @Test
     fun succ_true_test() {
-        StellaTestsRunner.runBadTest(StellaTypeError.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "succ_true")
+        StellaTestsRunner.runBadTest(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "succ_true")
     }
     @Test
     fun different_branches_test() {
-        StellaTestsRunner.runBadTest(StellaTypeError.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "different_branches")
+        StellaTestsRunner.runBadTest(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "different_branches")
     }
     @Test
     fun no_nat_rec_test() {
-        StellaTestsRunner.runBadTest(StellaTypeError.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "no_nat_rec")
+        StellaTestsRunner.runBadTest(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "no_nat_rec")
     }
     @Test
     fun unexpected_s_rec_test() {
-        StellaTestsRunner.runBadTest(StellaTypeError.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "unexpected_s_rec")
+        StellaTestsRunner.runBadTest(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "unexpected_s_rec")
     }
     @Test
     fun simple_ascription_test() {
-        StellaTestsRunner.runBadTest(StellaTypeError.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "simple_ascription")
+        StellaTestsRunner.runBadTest(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "simple_ascription")
     }
     @Test
     fun if_nat_test() {
-        StellaTestsRunner.runBadTest(StellaTypeError.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "if_nat")
+        StellaTestsRunner.runBadTest(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "if_nat")
     }
     
 }
@@ -171,7 +172,7 @@ class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
 class ERROR_UNEXPECTED_FIELD_ACCESS_TESTS {
     @Test
     fun simple_field_access_test() {
-        StellaTestsRunner.runBadTest(StellaTypeError.ERROR_UNEXPECTED_FIELD_ACCESS, "simple_field_access")
+        StellaTestsRunner.runBadTest(StellaErrorType.ERROR_UNEXPECTED_FIELD_ACCESS, "simple_field_access")
     }
     
 }
@@ -179,7 +180,7 @@ class ERROR_UNEXPECTED_FIELD_ACCESS_TESTS {
 class ERROR_NOT_A_FUNCTION_TESTS {
     @Test
     fun simple_no_function_test() {
-        StellaTestsRunner.runBadTest(StellaTypeError.ERROR_NOT_A_FUNCTION, "simple_no_function")
+        StellaTestsRunner.runBadTest(StellaErrorType.ERROR_NOT_A_FUNCTION, "simple_no_function")
     }
     
 }
@@ -187,7 +188,7 @@ class ERROR_NOT_A_FUNCTION_TESTS {
 class ERROR_UNEXPECTED_LAMBDA_TESTS {
     @Test
     fun simple_unexpected_lambda_test() {
-        StellaTestsRunner.runBadTest(StellaTypeError.ERROR_UNEXPECTED_LAMBDA, "simple_unexpected_lambda")
+        StellaTestsRunner.runBadTest(StellaErrorType.ERROR_UNEXPECTED_LAMBDA, "simple_unexpected_lambda")
     }
     
 }
@@ -195,7 +196,7 @@ class ERROR_UNEXPECTED_LAMBDA_TESTS {
 class ERROR_TUPLE_INDEX_OUT_OF_BOUNDS_TESTS {
     @Test
     fun simple_index_out_test() {
-        StellaTestsRunner.runBadTest(StellaTypeError.ERROR_TUPLE_INDEX_OUT_OF_BOUNDS, "simple_index_out")
+        StellaTestsRunner.runBadTest(StellaErrorType.ERROR_TUPLE_INDEX_OUT_OF_BOUNDS, "simple_index_out")
     }
     
 }

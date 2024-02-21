@@ -1,4 +1,6 @@
-enum class StellaTypeError {
+package types.checker
+
+enum class StellaErrorType {
     ERROR_MISSING_MAIN,
     ERROR_UNDEFINED_VARIABLE,
     ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,

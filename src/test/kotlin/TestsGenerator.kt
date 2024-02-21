@@ -1,3 +1,4 @@
+import types.checker.StellaErrorType
 import java.io.File
 
 private const val INDENT = "    "
@@ -24,7 +25,7 @@ private fun StringBuilder.generateBadTests() {
     val errorTypes = File(badTestsPath).listFiles { file -> file.isDirectory } ?: error("no ok tests")
 
     for (errorDir in errorTypes) {
-        val errorType = StellaTypeError.valueOf(errorDir.name)
+        val errorType = StellaErrorType.valueOf(errorDir.name)
         val files = errorDir.listFiles { file -> file.extension == FILE_EXTENSION } ?: continue
 
         addTestClass("${errorType}_TESTS") {
@@ -68,11 +69,11 @@ private fun StringBuilder.addOkTestFunction(file: File) {
     appendLine(content)
 }
 
-private fun StringBuilder.addBadTestFunction(errorType: StellaTypeError, file: File) {
+private fun StringBuilder.addBadTestFunction(errorType: StellaErrorType, file: File) {
     val content = """
         @Test
         fun ${file.nameWithoutExtension}_test() {
-            StellaTestsRunner.runBadTest(StellaTypeError.$errorType, "${file.nameWithoutExtension}")
+            StellaTestsRunner.runBadTest(types.checker.StellaTypeError.$errorType, "${file.nameWithoutExtension}")
         }
     """.trimIndent()
 
