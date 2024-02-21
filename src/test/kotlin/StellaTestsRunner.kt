@@ -1,3 +1,4 @@
+import org.antlr.v4.gui.Trees
 import org.antlr.v4.runtime.*
 import org.antlr.v4.runtime.atn.ATNConfigSet
 import org.antlr.v4.runtime.dfa.DFA
@@ -40,7 +41,7 @@ object StellaTestsRunner {
     private fun runAnalysis(file: File): Pair<List<StellaError>, stellaParser> {
         val programTextStream = file.inputStream()
 
-        val lexer = stellaLexer(UnbufferedCharStream(programTextStream))
+        val lexer = stellaLexer(CharStreams.fromStream(programTextStream))
 
         val tokens = CommonTokenStream(lexer)
         val parser = stellaParser(tokens)
@@ -112,6 +113,6 @@ object StellaTestsRunner {
 
     private fun StellaError.formatToString(parser: stellaParser) = buildString {
         append("ERROR: $type")
-        append(node.toInfoString(parser))
+        append(node.toStringTree(parser))
     }
 }
