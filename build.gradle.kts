@@ -11,7 +11,7 @@ repositories {
 }
 
 dependencies {
-    antlr("org.antlr:antlr4:4.5")
+    antlr("org.antlr:antlr4:4.8")
 
     // Use the Kotlin JUnit 5 integration.
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
