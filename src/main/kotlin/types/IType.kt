@@ -1,5 +1,5 @@
 package types
 
-data class SimpleType (
+sealed interface IType {
     val name: String
-)
+}
