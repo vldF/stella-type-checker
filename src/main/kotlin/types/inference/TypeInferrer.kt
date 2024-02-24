@@ -38,7 +38,7 @@ internal class TypeInferrer(
         }
 
         val thenType = ctx.thenExpr.accept(this) ?: return null
-        val elseType = ctx.thenExpr.accept(this) ?: return null
+        val elseType = ctx.elseExpr.accept(this) ?: return null
 
         if (thenType != elseType) {
             errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, ctx)
