@@ -33,8 +33,15 @@ class TypeCheckerVisitor(
         val topLevelInfoCollector = TopLevelInfoCollector(errorManager, functionContext)
         topLevelInfoCollector.visit(ctx)
 
-        val typeInferrer = TypeInferrer(errorManager, functionContext)
         val returnExpr = ctx.returnExpr
+        val typeInferrer = TypeInferrer(errorManager, functionContext)
+
+        if (expectedFunctionType is FunctionalType && returnExpr is stellaParser.AbstractionContext) {
+            if (!checkReturnAbsType(expectedFunctionType, returnExpr, typeContext)) {
+                return
+            }
+        }
+
         val returnExpressionType = returnExpr.accept(typeInferrer)
 
         if (returnExpressionType is FunctionalType && expectedFunctionType !is FunctionalType) {
@@ -44,5 +51,36 @@ class TypeCheckerVisitor(
         if (expectedFunctionType != returnExpressionType) {
             errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, returnExpr)
         }
+    }
+
+    private fun checkReturnAbsType(
+        expected: FunctionalType,
+        abstraction: stellaParser.AbstractionContext,
+        typeContext: TypeContext
+    ): Boolean {
+        val typeInferrer = TypeInferrer(errorManager, typeContext)
+
+        val absArgCtx = abstraction.paramDecl
+        val absArgType = absArgCtx.paramType.accept(typeInferrer)
+
+        if (expected.from != absArgType) {
+            errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_PARAMETER, abstraction.paramDecl)
+            return false
+        }
+
+        if (expected.to !is FunctionalType) {
+            return true
+        }
+
+        val newTypeContext = TypeContext(typeContext)
+        newTypeContext.saveVariableType(absArgCtx.paramName, absArgType)
+
+        val absReturnExpression = abstraction.returnExpr
+        if (absReturnExpression !is stellaParser.AbstractionContext) {
+            errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, absReturnExpression)
+            return false
+        }
+
+        return checkReturnAbsType(expected.to, absReturnExpression, newTypeContext)
     }
 }
