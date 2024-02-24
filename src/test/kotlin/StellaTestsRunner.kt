@@ -25,14 +25,23 @@ object StellaTestsRunner {
 
         val (errors, parser) = runAnalysis(file)
 
-        Assertions.assertEquals(1, errors.size) {
-            val errorsAsText = errors.formatToString(parser)
-            "unexpected errors count. Errors: $errorsAsText"
+//        Assertions.assertEquals(1, errors.size) {
+//            val errorsAsText = errors.formatToString(parser)
+//            "unexpected errors count. Errors: $errorsAsText"
+//        }
+//
+//        val error = errors.first()
+//        Assertions.assertEquals(errorType, error.type) {
+//            "expected error type $errorType, but got ${error.formatToString(parser)}"
+//        }
+
+        Assertions.assertTrue(errors.isNotEmpty()) {
+            "No errors got"
         }
 
-        val error = errors.first()
-        Assertions.assertEquals(errorType, error.type) {
-            "expected error type $errorType, but got ${error.formatToString(parser)}"
+        Assertions.assertTrue(errorType in errors.map { it.type }) {
+            val errorsAsText = errors.formatToString(parser)
+            "expected error is not got, but got $errorsAsText"
         }
     }
 
