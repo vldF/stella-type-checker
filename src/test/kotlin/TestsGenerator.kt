@@ -19,6 +19,8 @@ private fun StringBuilder.generateOkTests() {
     addTestClass("OK_TESTS") {
         files.forEach(::addOkTestFunction)
     }
+
+    appendLine()
 }
 
 private fun StringBuilder.generateBadTests() {
@@ -32,6 +34,7 @@ private fun StringBuilder.generateBadTests() {
             files.forEach { file -> addBadTestFunction(errorType, file) }
         }
 
+        appendLine()
     }
 }
 
@@ -73,7 +76,7 @@ private fun StringBuilder.addBadTestFunction(errorType: StellaErrorType, file: F
     val content = """
         @Test
         fun ${file.nameWithoutExtension}_test() {
-            StellaTestsRunner.runBadTest(types.checker.StellaTypeError.$errorType, "${file.nameWithoutExtension}")
+            StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.$errorType, "${file.nameWithoutExtension}")
         }
     """.trimIndent()
 
