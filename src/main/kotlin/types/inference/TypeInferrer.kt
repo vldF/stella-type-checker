@@ -163,7 +163,7 @@ internal class TypeInferrer(
 
     override fun visitVar(ctx: stellaParser.VarContext): IType? {
         val name = ctx.name.text
-        val type = context.resolveVariableType(name)
+        val type = context.resolveVariableType(name) ?: context.resolveFunctionType(name)
 
         if (type == null) {
             errorManager.registerError(StellaErrorType.ERROR_UNDEFINED_VARIABLE, ctx)
