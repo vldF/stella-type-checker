@@ -25,21 +25,14 @@ object StellaTestsRunner {
 
         val (errors, parser) = runAnalysis(file)
 
-//        Assertions.assertEquals(1, errors.size) {
-//            val errorsAsText = errors.formatToString(parser)
-//            "unexpected errors count. Errors: $errorsAsText"
-//        }
-//
-//        val error = errors.first()
-//        Assertions.assertEquals(errorType, error.type) {
-//            "expected error type $errorType, but got ${error.formatToString(parser)}"
-//        }
-
         Assertions.assertTrue(errors.isNotEmpty()) {
             "No errors got"
         }
 
-        if (errorType !in errors.map { it.type }) {
+        val expectedErrors = getAlternativeErrors(file).toSet().plus(errorType)
+        val actualErrors = errors.map { it.type }.toSet()
+
+        if (!expectedErrors.containsAll(actualErrors)) {
             Assertions.fail<Unit> {
                 val errorsAsText = errors.formatToString(parser)
                 "expected error $errorType, but got: \n$errorsAsText"
@@ -121,5 +114,25 @@ object StellaTestsRunner {
     private fun StellaError.formatToString(parser: stellaParser) = buildString {
         append("ERROR: $type ")
         append(node.toStringTree(parser))
+    }
+
+    private fun getAlternativeErrors(file: File): List<StellaErrorType> {
+        val firstLine = file
+            .readText()
+            .lines()
+            .first()
+
+        val commentPrefix = "//"
+        if (!firstLine.startsWith(commentPrefix)) {
+            return emptyList()
+        }
+
+        val errors = firstLine
+            .removePrefix(commentPrefix)
+            .trim()
+            .replace(",", "")
+            .split(",")
+
+        return errors.map { StellaErrorType.valueOf(it) }
     }
 }
