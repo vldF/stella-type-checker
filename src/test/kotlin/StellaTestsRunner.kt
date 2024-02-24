@@ -104,9 +104,7 @@ object StellaTestsRunner {
     }
 
     private fun List<StellaError>.formatToString(parser: stellaParser): String {
-        return buildString {
-            this@formatToString.joinToString(separator = "\n") { it -> it.formatToString(parser) }
-        }
+        return this.joinToString(separator = "\n") { it.formatToString(parser) }
     }
 
     private fun StellaError.formatToString(parser: stellaParser) = buildString {
