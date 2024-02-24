@@ -231,6 +231,21 @@ internal class TypeInferrer(
         return null
     }
 
+    override fun visitLet(ctx: stellaParser.LetContext): IType? {
+        val patternBinding = ctx.patternBinding(0)
+        val name = patternBinding.pat.text
+        val expression = patternBinding.rhs
+
+        val expressionType = visit(expression) ?: return null
+
+        val letContext = TypeContext(context)
+        letContext.saveVariableType(name, expressionType)
+
+        val letTypeInferrer = TypeInferrer(errorManager, letContext)
+        return letTypeInferrer.visit(ctx.body)
+    }
+
+
     override fun aggregateResult(aggregate: IType?, nextResult: IType?): IType? {
         return when {
             aggregate == null -> nextResult
