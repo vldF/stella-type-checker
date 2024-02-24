@@ -39,9 +39,11 @@ object StellaTestsRunner {
             "No errors got"
         }
 
-        Assertions.assertTrue(errorType in errors.map { it.type }) {
-            val errorsAsText = errors.formatToString(parser)
-            "expected error is not got, but got $errorsAsText"
+        if (errorType !in errors.map { it.type }) {
+            Assertions.fail<Unit> {
+                val errorsAsText = errors.formatToString(parser)
+                "expected error $errorType, but got: \n$errorsAsText"
+            }
         }
     }
 
