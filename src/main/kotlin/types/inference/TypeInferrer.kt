@@ -245,6 +245,19 @@ internal class TypeInferrer(
         return letTypeInferrer.visit(ctx.body)
     }
 
+    override fun visitTypeAsc(ctx: stellaParser.TypeAscContext): IType? {
+        val expression = ctx.expr_
+        val expressionType = expression.accept(this) ?: return null
+
+        val targetType = ctx.type_.accept(this) ?: return null
+
+        if (expressionType != targetType) {
+            errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, ctx)
+            return null
+        }
+
+        return targetType
+    }
 
     override fun aggregateResult(aggregate: IType?, nextResult: IType?): IType? {
         return when {
