@@ -42,7 +42,7 @@ class TypeCheckerVisitor(
             }
         }
 
-        val returnExpressionType = returnExpr.accept(typeInferrer)
+        val returnExpressionType = returnExpr.accept(typeInferrer) ?: return
 
         if (returnExpressionType is FunctionalType && expectedFunctionType !is FunctionalType) {
             errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_LAMBDA, returnExpr)
