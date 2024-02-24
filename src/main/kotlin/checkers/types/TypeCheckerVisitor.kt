@@ -6,6 +6,7 @@ import functionName
 import paramName
 import stellaParser
 import stellaParserBaseVisitor
+import types.FunctionalType
 import types.TypeContext
 import types.inference.TypeInferrer
 
@@ -35,6 +36,10 @@ class TypeCheckerVisitor(
         val typeInferrer = TypeInferrer(errorManager, functionContext)
         val returnExpr = ctx.returnExpr
         val returnExpressionType = returnExpr.accept(typeInferrer)
+
+        if (returnExpressionType is FunctionalType && expectedFunctionType !is FunctionalType) {
+            errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_LAMBDA, returnExpr)
+        }
 
         if (expectedFunctionType != returnExpressionType) {
             errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, returnExpr)
