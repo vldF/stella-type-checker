@@ -173,6 +173,14 @@ internal class TypeInferrer(
         return type
     }
 
+    override fun visitConstUnit(ctx: stellaParser.ConstUnitContext?): UnitType {
+        return UnitType
+    }
+
+    override fun visitTypeUnit(ctx: stellaParser.TypeUnitContext?): IType? {
+        return UnitType
+    }
+
     override fun visitTuple(ctx: stellaParser.TupleContext?): IType? {
         // todo
         return null

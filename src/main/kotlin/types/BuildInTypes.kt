@@ -15,3 +15,11 @@ object BoolType : IType {
         return other != null && other is BoolType
     }
 }
+
+object UnitType : IType {
+    override val name: String = "Unit"
+
+    override fun equals(other: Any?): Boolean {
+        return other != null && other is UnitType
+    }
+}
