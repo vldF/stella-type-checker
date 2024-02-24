@@ -1,4 +1,4 @@
-package types.checker
+package checkers.errors
 
 enum class StellaErrorType {
     ERROR_MISSING_MAIN,

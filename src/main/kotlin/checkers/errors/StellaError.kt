@@ -1,4 +1,4 @@
-package types.checker
+package checkers.errors
 
 import org.antlr.v4.runtime.ParserRuleContext
 

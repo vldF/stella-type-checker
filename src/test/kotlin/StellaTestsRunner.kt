@@ -1,12 +1,10 @@
-import org.antlr.v4.gui.Trees
+import checkers.StellaChecker
+import checkers.errors.StellaError
+import checkers.errors.StellaErrorType
 import org.antlr.v4.runtime.*
 import org.antlr.v4.runtime.atn.ATNConfigSet
 import org.antlr.v4.runtime.dfa.DFA
 import org.junit.jupiter.api.Assertions
-import types.checker.ErrorManager
-import types.checker.StellaError
-import types.checker.StellaTypeChecker
-import types.checker.StellaErrorType
 import java.io.File
 import java.util.*
 
@@ -54,10 +52,10 @@ object StellaTestsRunner {
 
         val program = parser.program()
 
-        val typeChecker = StellaTypeChecker()
-        typeChecker.analyze(program)
+        val checker = StellaChecker()
+        val errors = checker.check(program)
 
-        return typeChecker.getErrors() to parser
+        return errors to parser
     }
 
     private class ErrorListener : DiagnosticErrorListener(/* exactOnly = */ false) {

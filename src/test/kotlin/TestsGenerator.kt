@@ -1,4 +1,4 @@
-import types.checker.StellaErrorType
+import checkers.errors.StellaErrorType
 import java.io.File
 
 private const val INDENT = "    "

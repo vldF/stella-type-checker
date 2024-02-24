@@ -1,5 +1,5 @@
+import checkers.errors.StellaErrorType
 import org.junit.jupiter.api.Test
-import types.checker.StellaErrorType
 
 // DO NOT MODIFY THIS FILE MANUALLY
 // Edit TestsGenerator.kt instead
