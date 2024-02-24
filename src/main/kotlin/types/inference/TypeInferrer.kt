@@ -2,6 +2,7 @@ package types.inference
 
 import checkers.errors.ErrorManager
 import checkers.errors.StellaErrorType
+import paramName
 import stellaParser
 import stellaParserBaseVisitor
 import types.*
@@ -124,8 +125,12 @@ internal class TypeInferrer(
         val arg = ctx.paramDecl
         val argType = arg.accept(newInferrer) ?: return null
 
+        val innerContext = TypeContext(context)
+        innerContext.saveVariableType(arg.paramName, argType)
+        val innerVisitor = TypeInferrer(errorManager, innerContext)
+
         val returnExpr = ctx.returnExpr
-        val returnType = returnExpr.accept(this) ?: return null
+        val returnType = returnExpr.accept(innerVisitor) ?: return null
 
         return FunctionalType(argType, returnType)
     }
