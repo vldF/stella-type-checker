@@ -177,18 +177,48 @@ internal class TypeInferrer(
         return UnitType
     }
 
-    override fun visitTypeUnit(ctx: stellaParser.TypeUnitContext?): IType? {
+    override fun visitTypeUnit(ctx: stellaParser.TypeUnitContext?): IType {
         return UnitType
     }
 
-    override fun visitTuple(ctx: stellaParser.TupleContext?): IType? {
-        // todo
-        return null
+    override fun visitTuple(ctx: stellaParser.TupleContext): TupleType? {
+        val content = ctx.expr()
+        val contentTypes = content.map {
+            it.accept(this)
+        }
+
+        if (contentTypes.any { it == null }) {
+            return null
+        }
+
+        return TupleType(contentTypes.filterNotNull().toTypedArray())
     }
 
-    override fun visitTypeTuple(ctx: stellaParser.TypeTupleContext?): IType? {
-        // todo
-        return null
+    override fun visitTypeTuple(ctx: stellaParser.TypeTupleContext): TupleType? {
+        val types = ctx.types.map { visit(it) }
+        if (types.any { it == null }) {
+            return null
+        }
+
+        return TupleType(types.filterNotNull().toTypedArray())
+    }
+
+    override fun visitDotTuple(ctx: stellaParser.DotTupleContext): IType? {
+        val expr = ctx.expr_
+        val expressionType = expr.accept(this) ?: return null
+        if (expressionType !is TupleType) {
+            errorManager.registerError(StellaErrorType.ERROR_NOT_A_TUPLE, expr)
+            return null
+        }
+
+        val indexNode = ctx.index
+        val indexValue = indexNode.text.toInt()
+        if (indexValue > expressionType.arity || indexValue == 0) {
+            errorManager.registerError(StellaErrorType.ERROR_TUPLE_INDEX_OUT_OF_BOUNDS, expr)
+            return null
+        }
+
+        return expressionType.types[indexValue - 1]
     }
 
     override fun visitRecord(ctx: stellaParser.RecordContext?): IType? {
