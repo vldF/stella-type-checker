@@ -16,7 +16,8 @@ object StellaTestsRunner {
         StellaExtension.Tuples,
         StellaExtension.Records,
         StellaExtension.LetBindings,
-        StellaExtension.NaturalLiterals
+        StellaExtension.NaturalLiterals,
+        StellaExtension.TypeAscriptions,
     )
 
     fun runOkTest(testName: String) {
