@@ -20,12 +20,12 @@ class RecordType(
     }
 
     override fun equals(other: Any?): Boolean {
-        if (other == null || other !is RecordType) {
-            return false
+        if (!isKnownType || other is IType && !other.isKnownType) {
+            return true
         }
 
-        if (!this.isKnownType || !other.isKnownType) {
-            return true
+        if (other == null || other !is RecordType) {
+            return false
         }
 
         return this.labels contentEquals other.labels && this.types contentEquals other.types

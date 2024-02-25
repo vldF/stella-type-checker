@@ -15,14 +15,14 @@ class TupleType(
     internal constructor(isKnownType: Boolean = true) : this(arrayOf(), isKnownType)
 
     override fun equals(other: Any?): Boolean {
+        if (!isKnownType || other is IType && !other.isKnownType) {
+            return true
+        }
+
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
         other as TupleType
-
-        if (!this.isKnownType || !other.isKnownType) {
-            return true
-        }
 
         return types.contentEquals(other.types)
     }

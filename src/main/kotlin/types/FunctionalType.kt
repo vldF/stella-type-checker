@@ -6,14 +6,16 @@ class FunctionalType(
     isKnownType: Boolean = true
 ) : IType(isKnownType) {
     override val name: String = if (isKnownType) {
-        "(${from.name}) -> $to"
+        "(${from.name}) -> ${to.name}"
     } else {
         "(?) -> (?)"
     }
 
-    internal constructor(isKnownType: Boolean) : this(UnknownType, UnknownType, isKnownType = false)
-
     override fun equals(other: Any?): Boolean {
+        if (!isKnownType || other is IType && !other.isKnownType) {
+            return true
+        }
+
         return other != null && other is FunctionalType && (this.from == other.from && this.to == other.to)
     }
 

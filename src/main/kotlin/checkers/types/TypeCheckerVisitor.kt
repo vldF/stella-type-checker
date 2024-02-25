@@ -3,11 +3,12 @@ package checkers.types
 import checkers.errors.ErrorManager
 import checkers.errors.StellaErrorType
 import functionName
+import org.antlr.v4.runtime.ParserRuleContext
 import paramName
 import stellaParser
 import stellaParserBaseVisitor
-import types.FunctionalType
-import types.TypeContext
+import types.*
+import types.inference.DumbTypeInferrer
 import types.inference.TypeInferrer
 
 class TypeCheckerVisitor(
@@ -36,10 +37,8 @@ class TypeCheckerVisitor(
         val returnExpr = ctx.returnExpr
         val typeInferrer = TypeInferrer(errorManager, functionContext)
 
-        if (expectedFunctionType is FunctionalType && returnExpr is stellaParser.AbstractionContext) {
-            if (!checkReturnAbsType(expectedFunctionType, returnExpr, typeContext)) {
-                return
-            }
+        if (!dumpCheckFunctionReturnType(expectedFunctionType, returnExpr)) {
+            return
         }
 
         val returnExpressionType = returnExpr.accept(typeInferrer) ?: return
@@ -53,34 +52,55 @@ class TypeCheckerVisitor(
         }
     }
 
-    private fun checkReturnAbsType(
-        expected: FunctionalType,
-        abstraction: stellaParser.AbstractionContext,
-        typeContext: TypeContext
+    private fun dumpCheckFunctionReturnType(
+        expected: IType,
+        retExpression: ParserRuleContext,
     ): Boolean {
-        val typeInferrer = TypeInferrer(errorManager, typeContext)
+        val dumbTypeInferrer = DumbTypeInferrer()
 
-        val absArgCtx = abstraction.paramDecl
-        val absArgType = absArgCtx.paramType.accept(typeInferrer)
+        val absArgType = dumbTypeInferrer.getType(retExpression)
 
-        if (expected.from != absArgType) {
-            errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_PARAMETER, abstraction.paramDecl)
-            return false
+        when (absArgType) {
+            is UnknownType -> {
+                return true // continue type checking
+            }
+
+            is FunctionalType -> {
+                if (expected !is FunctionalType) {
+                    errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, retExpression)
+                    return false
+                }
+
+                if (absArgType != expected) {
+                    errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_PARAMETER, retExpression)
+                    return false
+                }
+                    return true
+            }
+
+            is TupleType -> {
+                if (expected !is TupleType) {
+                    errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_TUPLE, retExpression)
+                    return false
+                }
+
+                return true
+            }
+
+            is RecordType -> {
+                if (expected !is RecordType) {
+                    errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_RECORD, retExpression)
+                    return false
+                }
+
+                return true
+            }
+
+            // todo: ERROR_UNEXPECTED_LIST
+            // todo: ERROR_UNEXPECTED_INJECTION
+            else -> {}
         }
 
-        if (expected.to !is FunctionalType) {
-            return true
-        }
-
-        val newTypeContext = TypeContext(typeContext)
-        newTypeContext.saveVariableType(absArgCtx.paramName, absArgType)
-
-        val absReturnExpression = abstraction.returnExpr
-        if (absReturnExpression !is stellaParser.AbstractionContext) {
-            errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, absReturnExpression)
-            return false
-        }
-
-        return checkReturnAbsType(expected.to, absReturnExpression, newTypeContext)
+        return true
     }
 }
