@@ -1,10 +1,17 @@
 package types
 
-data class FunctionalType(
+class FunctionalType(
     val from: IType,
-    val to: IType
-) : IType {
-    override val name: String = "(${from.name}) -> $to"
+    val to: IType,
+    isKnownType: Boolean = true
+) : IType(isKnownType) {
+    override val name: String = if (isKnownType) {
+        "(${from.name}) -> $to"
+    } else {
+        "(?) -> (?)"
+    }
+
+    internal constructor(isKnownType: Boolean) : this(UnknownType, UnknownType, isKnownType = false)
 
     override fun equals(other: Any?): Boolean {
         return other != null && other is FunctionalType && (this.from == other.from && this.to == other.to)

@@ -1,6 +1,6 @@
 package types
 
-object NatType : IType {
+object NatType : IType() {
     override val name: String = "Nat"
 
     override fun equals(other: Any?): Boolean {
@@ -8,7 +8,7 @@ object NatType : IType {
     }
 }
 
-object BoolType : IType {
+object BoolType : IType() {
     override val name: String = "Bool"
 
     override fun equals(other: Any?): Boolean {
@@ -16,7 +16,7 @@ object BoolType : IType {
     }
 }
 
-object UnitType : IType {
+object UnitType : IType() {
     override val name: String = "Unit"
 
     override fun equals(other: Any?): Boolean {

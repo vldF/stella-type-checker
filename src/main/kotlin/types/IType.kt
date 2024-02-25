@@ -1,5 +1,6 @@
 package types
 
-sealed interface IType {
-    val name: String
+sealed class IType(protected val isKnownType: Boolean = true) {
+    abstract val name: String
+
 }
