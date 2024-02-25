@@ -100,7 +100,7 @@ internal class TypeInferrer(
         }
 
         if (stepFunctionType.to.from != stepFunctionType.to.to) {
-            errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_PARAMETER, ctx.step)
+            errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, ctx.step)
             return null
         }
 
@@ -249,9 +249,18 @@ internal class TypeInferrer(
 
     override fun visitDotRecord(ctx: stellaParser.DotRecordContext): IType? {
         val expression = ctx.expr_
-        val expressionType = expression.accept(this)
-
         val label = ctx.label.text
+
+        if (expression is stellaParser.RecordContext) {
+            val declaredLabels = expression.bindings.map { it.name.text }
+
+            if (label !in declaredLabels) {
+                errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_FIELD_ACCESS, ctx)
+                return null
+            }
+        }
+
+        val expressionType = expression.accept(this)
 
         if (expressionType !is RecordType) {
             errorManager.registerError(StellaErrorType.ERROR_NOT_A_RECORD, ctx)
