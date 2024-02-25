@@ -13,8 +13,9 @@ import types.inference.TypeInferrer
 
 class TypeCheckerVisitor(
     private val errorManager: ErrorManager,
+    parentTypeContext: TypeContext? = null
 ) : stellaParserBaseVisitor<Unit>() {
-    private val typeContext = TypeContext()
+    private val typeContext = TypeContext(parentTypeContext)
 
     override fun visitProgram(ctx: stellaParser.ProgramContext) {
         val topLevelInfoCollector = TopLevelInfoCollector(errorManager, typeContext)
@@ -32,7 +33,10 @@ class TypeCheckerVisitor(
         functionContext.saveVariableType(ctx.paramDecl.paramName, functionType.from)
 
         val topLevelInfoCollector = TopLevelInfoCollector(errorManager, functionContext)
-        topLevelInfoCollector.visit(ctx)
+        ctx.children.forEach { c -> topLevelInfoCollector.visit(c) }
+
+        val innerTypeCheckerVisitor = TypeCheckerVisitor(errorManager, functionContext)
+        ctx.children.forEach { c -> innerTypeCheckerVisitor.visit(c) }
 
         val returnExpr = ctx.returnExpr
         val typeInferrer = TypeInferrer(errorManager, functionContext)

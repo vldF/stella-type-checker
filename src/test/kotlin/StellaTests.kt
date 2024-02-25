@@ -78,6 +78,10 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("record_apply_to_function")
     }
     @Test
+    fun nested_functions_params_shadowing_test() {
+        StellaTestsRunner.runOkTest("nested_functions_params_shadowing")
+    }
+    @Test
     fun increment_twice_test() {
         StellaTestsRunner.runOkTest("increment_twice")
     }
@@ -100,6 +104,10 @@ class OK_TESTS {
     @Test
     fun let_if_test() {
         StellaTestsRunner.runOkTest("let_if")
+    }
+    @Test
+    fun nested_functions_test() {
+        StellaTestsRunner.runOkTest("nested_functions")
     }
     @Test
     fun variant_attempt_test() {
@@ -361,6 +369,10 @@ class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
     @Test
     fun record_dot_test() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "record_dot")
+    }
+    @Test
+    fun nested_function_params_shadowing_test() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "nested_function_params_shadowing")
     }
     @Test
     fun unexpected_label_type_test() {

@@ -18,6 +18,7 @@ object StellaTestsRunner {
         StellaExtension.LetBindings,
         StellaExtension.NaturalLiterals,
         StellaExtension.TypeAscriptions,
+        StellaExtension.NestedFunctionDeclarations,
     )
 
     fun runOkTest(testName: String) {
