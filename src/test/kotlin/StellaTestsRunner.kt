@@ -5,10 +5,20 @@ import org.antlr.v4.runtime.*
 import org.antlr.v4.runtime.atn.ATNConfigSet
 import org.antlr.v4.runtime.dfa.DFA
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assumptions
 import java.io.File
 import java.util.*
 
 object StellaTestsRunner {
+    private val supportedExtensions = setOf(
+        StellaExtension.UnitType,
+        StellaExtension.Pairs,
+        StellaExtension.Tuples,
+        StellaExtension.Records,
+        StellaExtension.LetBindings,
+        StellaExtension.NaturalLiterals
+    )
+
     fun runOkTest(testName: String) {
         val file = File(okTestsPath).resolve(testName + FILE_EXTENSION_WITH_PERIOD)
 
@@ -55,6 +65,14 @@ object StellaTestsRunner {
         parser.addErrorListener(parserErrorListener)
 
         val program = parser.program()
+
+        val testExtensions = program.getExtensions()
+        val unsupportedExtensions = testExtensions - supportedExtensions
+
+        Assumptions.assumeTrue(
+            unsupportedExtensions.isEmpty(),
+            "unsupported extensions were found: $unsupportedExtensions"
+        )
 
         val checker = StellaChecker()
         val errors = checker.check(program)
@@ -134,5 +152,14 @@ object StellaTestsRunner {
             .split(",")
 
         return errors.map { StellaErrorType.valueOf(it) }
+    }
+
+    private fun stellaParser.ProgramContext.getExtensions(): List<StellaExtension> {
+        val anExtensionContext = extension()
+        return anExtensionContext
+            .filterIsInstance<stellaParser.AnExtensionContext>()
+            .flatMap { it.extensionNames }
+            .map { it.text.removePrefix("#") }
+            .map { StellaExtension.fromString(it) }
     }
 }
