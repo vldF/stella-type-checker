@@ -211,8 +211,8 @@ internal class TypeInferrer(
             return null
         }
 
-        val indexNode = ctx.index
-        val indexValue = indexNode.text.toInt()
+        val indexContext = ctx.index
+        val indexValue = indexContext.text.toInt()
         if (indexValue > expressionType.arity || indexValue == 0) {
             errorManager.registerError(StellaErrorType.ERROR_TUPLE_INDEX_OUT_OF_BOUNDS, expr)
             return null
@@ -221,14 +221,50 @@ internal class TypeInferrer(
         return expressionType.types[indexValue - 1]
     }
 
-    override fun visitRecord(ctx: stellaParser.RecordContext?): IType? {
-        // todo
-        return null
+    @Suppress("DuplicatedCode")
+    override fun visitRecord(ctx: stellaParser.RecordContext): RecordType? {
+        val bindingsContext = ctx.bindings
+        val labels = bindingsContext.map { bind -> bind.name.text }
+        val types = bindingsContext.mapNotNull { bind -> bind.rhs.accept(this) }
+
+        if (labels.size != types.size) {
+            return null
+        }
+
+        return RecordType(labels.toTypedArray(), types.toTypedArray())
     }
 
-    override fun visitTypeRecord(ctx: stellaParser.TypeRecordContext?): IType? {
-        // todo
-        return null
+    @Suppress("DuplicatedCode")
+    override fun visitTypeRecord(ctx: stellaParser.TypeRecordContext): RecordType? {
+        val fieldContexts = ctx.fieldTypes
+        val labels = fieldContexts.map { field -> field.label.text }
+        val types = fieldContexts.mapNotNull { field -> field.type_.accept(this) }
+
+        if (labels.size != types.size) {
+            return null
+        }
+
+        return RecordType(labels.toTypedArray(), types.toTypedArray())
+    }
+
+    override fun visitDotRecord(ctx: stellaParser.DotRecordContext): IType? {
+        val expression = ctx.expr_
+        val expressionType = expression.accept(this)
+
+        val label = ctx.label.text
+
+        if (expressionType !is RecordType) {
+            errorManager.registerError(StellaErrorType.ERROR_NOT_A_RECORD, ctx)
+            return null
+        }
+
+        val labelIndex = expressionType.labels.indexOf(label)
+        if (labelIndex == -1) {
+            errorManager.registerError(StellaErrorType.ERROR_MISSING_RECORD_FIELDS, ctx)
+            return null
+        }
+
+        return expressionType.types[labelIndex]
     }
 
     override fun visitLet(ctx: stellaParser.LetContext): IType? {
