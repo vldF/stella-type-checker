@@ -7,7 +7,7 @@ class TupleType(
     val arity: Int = types.size
 
     override val name: String = if (isKnownType) {
-        types.joinToString(separator = ", ", prefix = "{", postfix = "}")
+        types.joinToString(separator = ", ", prefix = "{", postfix = "}") { it.name}
     } else {
         "UnknownTuple"
     }
