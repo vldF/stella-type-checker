@@ -48,11 +48,21 @@ class TypeCheckerVisitor(
         val returnExpressionType = returnExpr.accept(typeInferrer) ?: return
 
         if (returnExpressionType is FunctionalType && expectedFunctionType !is FunctionalType) {
-            errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_LAMBDA, returnExpr)
+            errorManager.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_LAMBDA,
+                returnExpressionType,
+                expectedFunctionType,
+                returnExpr
+            )
         }
 
         if (expectedFunctionType != returnExpressionType) {
-            errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, returnExpr)
+            errorManager.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
+                expectedFunctionType,
+                returnExpressionType,
+                returnExpr,
+            )
         }
     }
 
@@ -62,21 +72,33 @@ class TypeCheckerVisitor(
     ): Boolean {
         val dumbTypeInferrer = DumbTypeInferrer()
 
-        val absArgType = dumbTypeInferrer.getType(retExpression)
+        val absArgSyntaxType = dumbTypeInferrer.getType(retExpression)
+        val typeInferrer = TypeInferrer(errorManager = null, typeContext)
+        val absArgSemanticType by lazy { typeInferrer.visit(retExpression) ?: UnknownType }
 
-        when (absArgType) {
+        when (absArgSyntaxType) {
             is UnknownType -> {
                 return true // continue type checking
             }
 
             is FunctionalType -> {
                 if (expected !is FunctionalType) {
-                    errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, retExpression)
+                    errorManager.registerError(
+                        StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
+                        expected,
+                        absArgSemanticType,
+                        retExpression
+                    )
                     return false
                 }
 
-                if (absArgType != expected) {
-                    errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_PARAMETER, retExpression)
+                if (absArgSyntaxType != expected) {
+                    errorManager.registerError(
+                        StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_PARAMETER,
+                        expected,
+                        retExpression,
+                        absArgSemanticType
+                    )
                     return false
                 }
                     return true
@@ -84,7 +106,12 @@ class TypeCheckerVisitor(
 
             is TupleType -> {
                 if (expected !is TupleType) {
-                    errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_TUPLE, retExpression)
+                    errorManager.registerError(
+                        StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
+                        expected,
+                        absArgSemanticType,
+                        retExpression
+                    )
                     return false
                 }
 
@@ -93,7 +120,11 @@ class TypeCheckerVisitor(
 
             is RecordType -> {
                 if (expected !is RecordType) {
-                    errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_RECORD, retExpression)
+                    errorManager.registerError(
+                        StellaErrorType.ERROR_UNEXPECTED_RECORD,
+                        expected,
+                        absArgSemanticType
+                    )
                     return false
                 }
 

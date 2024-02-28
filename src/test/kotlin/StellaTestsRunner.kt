@@ -1,4 +1,5 @@
 import checkers.StellaChecker
+import checkers.errors.ErrorStrings
 import checkers.errors.StellaError
 import checkers.errors.StellaErrorType
 import org.antlr.v4.runtime.*
@@ -6,6 +7,7 @@ import org.antlr.v4.runtime.atn.ATNConfigSet
 import org.antlr.v4.runtime.dfa.DFA
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assumptions
+import types.IType
 import java.io.File
 import java.util.*
 
@@ -43,10 +45,12 @@ object StellaTestsRunner {
 
         val expectedErrors = getAlternativeErrors(file).toSet().plus(errorType)
         val actualErrors = errors.map { it.type }.toSet()
+        val errorsAsText = errors.formatToString(parser)
+
+        println(errorsAsText)
 
         if (!expectedErrors.containsAll(actualErrors)) {
             Assertions.fail<Unit> {
-                val errorsAsText = errors.formatToString(parser)
                 "expected error $errorType, but got: \n$errorsAsText"
             }
         }
@@ -132,8 +136,18 @@ object StellaTestsRunner {
     }
 
     private fun StellaError.formatToString(parser: stellaParser) = buildString {
-        append("ERROR: $type ")
-        append(node.toStringTree(parser))
+        appendLine("An error occurred during typechecking!")
+        appendLine("ERROR: $type")
+
+        val formattedArgs = args.map {
+            when (it) {
+                is ParserRuleContext -> it.toStringTree(parser)
+                is IType -> it.name
+                else -> it
+            }
+        }.map { "\n$it\n" }
+        val asString = ErrorStrings.strings[type]!!.format(*formattedArgs.toTypedArray())
+        appendLine(asString)
     }
 
     private fun getAlternativeErrors(file: File): List<StellaErrorType> {

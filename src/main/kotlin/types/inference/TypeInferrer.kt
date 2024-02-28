@@ -8,7 +8,7 @@ import stellaParserBaseVisitor
 import types.*
 
 internal class TypeInferrer(
-    private val errorManager: ErrorManager,
+    private val errorManager: ErrorManager?,
     parentContext: TypeContext? = null
 ) : stellaParserBaseVisitor<IType?>() {
     private val context = TypeContext(parentContext)
@@ -30,18 +30,29 @@ internal class TypeInferrer(
     }
 
     override fun visitIf(ctx: stellaParser.IfContext): IType? {
-        val condType = ctx.condition.accept(this) ?: return null
+        val condition = ctx.condition
+        val condType = condition.accept(this) ?: return null
 
         if (condType != BoolType) {
-            errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, ctx)
+            errorManager?.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
+                BoolType,
+                condType,
+                condition
+            )
             return null
         }
 
         val thenType = ctx.thenExpr.accept(this) ?: return null
         val elseType = ctx.elseExpr.accept(this) ?: return null
 
-        if (thenType != elseType) {
-            errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, ctx)
+        if (elseType != thenType) {
+            errorManager?.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
+                thenType,
+                elseType,
+                ctx
+            )
             return null
         }
 
@@ -53,10 +64,15 @@ internal class TypeInferrer(
     }
 
     override fun visitSucc(ctx: stellaParser.SuccContext): NatType? {
-        val innerType = ctx.n.accept(this)
+        val innerType = ctx.n.accept(this) ?: return null
 
         if (innerType != NatType) {
-            errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, ctx)
+            errorManager?.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
+                NatType,
+                innerType,
+                ctx.n
+            )
             return null
         }
 
@@ -67,7 +83,12 @@ internal class TypeInferrer(
         val innerType = ctx.n.accept(this)
 
         if (innerType != NatType) {
-            errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, ctx)
+            errorManager?.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
+                NatType,
+                innerType ?: UnknownType,
+                ctx
+            )
             return null
         }
 
@@ -77,35 +98,65 @@ internal class TypeInferrer(
     override fun visitNatRec(ctx: stellaParser.NatRecContext): IType? {
         val itersCountType = ctx.n.accept(this)
         if (itersCountType != NatType) {
-            errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, ctx)
+            errorManager?.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
+                NatType,
+                itersCountType ?: UnknownType,
+                ctx
+            )
             return null
         }
 
-        val initialValueType = ctx.initial.accept(this)
+        val initialValueType = ctx.initial.accept(this) ?: return null
         val stepFunctionType = ctx.step.accept(this)
 
         if (stepFunctionType !is FunctionalType) {
-            errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, ctx.step)
+            errorManager?.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
+                FunctionalType.unknownFunctionalTypeName,
+                stepFunctionType ?: UnknownType,
+                ctx.step
+            )
             return null
         }
 
         if (stepFunctionType.from != NatType) {
-            errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_PARAMETER, ctx.step)
+            errorManager?.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_PARAMETER,
+                NatType,
+                stepFunctionType.from,
+                ctx.step
+            )
             return null
         }
 
         if (stepFunctionType.to !is FunctionalType) {
-            errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, ctx.step)
+            errorManager?.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
+                FunctionalType.unknownFunctionalTypeName,
+                stepFunctionType.to,
+                ctx.step
+            )
             return null
         }
 
         if (stepFunctionType.to.from != stepFunctionType.to.to) {
-            errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, ctx.step)
+            errorManager?.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
+                stepFunctionType.to.to,
+                stepFunctionType.to.from,
+                ctx.step
+            )
             return null
         }
 
         if (stepFunctionType.to.from != initialValueType) {
-            errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, ctx.step)
+            errorManager?.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
+                initialValueType,
+                stepFunctionType.to.from,
+                ctx.step
+            )
             return null
         }
 
@@ -148,14 +199,23 @@ internal class TypeInferrer(
         val func = ctx.`fun`
         val funType = func.accept(this) ?: return null
         if (funType !is FunctionalType) {
-            errorManager.registerError(StellaErrorType.ERROR_NOT_A_FUNCTION, func)
+            errorManager?.registerError(
+                StellaErrorType.ERROR_NOT_A_FUNCTION,
+                funType,
+                func
+            )
             return null
         }
 
         val arg = ctx.args.first()
         val argType = arg.accept(this) ?: return null
         if (funType.from != argType) {
-            errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, arg)
+            errorManager?.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
+                funType.from,
+                argType,
+                arg
+            )
         }
 
         return funType.to
@@ -166,7 +226,11 @@ internal class TypeInferrer(
         val type = context.resolveVariableType(name) ?: context.resolveFunctionType(name)
 
         if (type == null) {
-            errorManager.registerError(StellaErrorType.ERROR_UNDEFINED_VARIABLE, ctx)
+            errorManager?.registerError(
+                StellaErrorType.ERROR_UNDEFINED_VARIABLE,
+                name,
+                ctx
+            )
             return null
         }
 
@@ -207,14 +271,22 @@ internal class TypeInferrer(
         val expr = ctx.expr_
         val expressionType = expr.accept(this) ?: return null
         if (expressionType !is TupleType) {
-            errorManager.registerError(StellaErrorType.ERROR_NOT_A_TUPLE, expr)
+            errorManager?.registerError(
+                StellaErrorType.ERROR_NOT_A_TUPLE,
+                expressionType,
+                ctx
+            )
             return null
         }
 
         val indexContext = ctx.index
         val indexValue = indexContext.text.toInt()
         if (indexValue > expressionType.arity || indexValue == 0) {
-            errorManager.registerError(StellaErrorType.ERROR_TUPLE_INDEX_OUT_OF_BOUNDS, expr)
+            errorManager?.registerError(
+                StellaErrorType.ERROR_TUPLE_INDEX_OUT_OF_BOUNDS,
+                indexValue,
+                expressionType.arity
+            )
             return null
         }
 
@@ -255,7 +327,11 @@ internal class TypeInferrer(
             val declaredLabels = expression.bindings.map { it.name.text }
 
             if (label !in declaredLabels) {
-                errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_FIELD_ACCESS, ctx)
+                errorManager?.registerError(
+                    StellaErrorType.ERROR_UNEXPECTED_FIELD_ACCESS,
+                    label,
+                    ctx
+                )
                 return null
             }
         }
@@ -263,13 +339,21 @@ internal class TypeInferrer(
         val expressionType = expression.accept(this)
 
         if (expressionType !is RecordType) {
-            errorManager.registerError(StellaErrorType.ERROR_NOT_A_RECORD, ctx)
+            errorManager?.registerError(
+                StellaErrorType.ERROR_NOT_A_RECORD,
+                expressionType ?: UnknownType,
+                ctx
+            )
             return null
         }
 
         val labelIndex = expressionType.labels.indexOf(label)
         if (labelIndex == -1) {
-            errorManager.registerError(StellaErrorType.ERROR_MISSING_RECORD_FIELDS, ctx)
+            errorManager?.registerError(
+                StellaErrorType.ERROR_MISSING_RECORD_FIELDS,
+                label,
+                ctx
+            )
             return null
         }
 
@@ -297,7 +381,12 @@ internal class TypeInferrer(
         val targetType = ctx.type_.accept(this) ?: return null
 
         if (expressionType != targetType) {
-            errorManager.registerError(StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, ctx)
+            errorManager?.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
+                targetType,
+                expressionType,
+                expression
+            )
             return null
         }
 

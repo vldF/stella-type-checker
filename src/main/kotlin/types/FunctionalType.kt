@@ -25,4 +25,8 @@ class FunctionalType(
         result = 31 * result + name.hashCode()
         return result
     }
+
+    companion object {
+        const val unknownFunctionalTypeName: String = "functional type"
+    }
 }

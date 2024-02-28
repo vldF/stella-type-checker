@@ -34,8 +34,7 @@ class MainFunctionCheckerVisitor(
 
         if (!isMainDiscovered) {
             errorManager.registerError(
-                StellaErrorType.ERROR_MISSING_MAIN,
-                ctx
+                StellaErrorType.ERROR_MISSING_MAIN
             )
         }
     }
