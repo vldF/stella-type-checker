@@ -88,11 +88,11 @@ FORALL : 'forall' ;
 COMMENT_antlr_builtin
 : (
 '//' ~[\r\n]* (('\r'? '\n')|EOF)
-) -> skip;
+) -> channel(HIDDEN);
 MULTICOMMENT_antlr_builtin
 : (
 '/*' (.)*? '*/'
-) -> skip;
+) -> channel(HIDDEN);
 
 StellaIdent : ('_'|LETTER) ([!\-:?_]|(DIGIT|LETTER))*;
 ExtensionName : '#' ([\-_]|(DIGIT|LETTER))+;
