@@ -2,7 +2,7 @@ package types.inference
 
 import checkers.errors.ErrorManager
 import checkers.errors.StellaErrorType
-import paramName
+import utils.paramName
 import stellaParser
 import stellaParserBaseVisitor
 import types.*

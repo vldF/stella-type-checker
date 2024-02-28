@@ -1,7 +1,7 @@
 package checkers.types
 
 import checkers.errors.ErrorManager
-import functionName
+import utils.functionName
 import org.antlr.v4.runtime.tree.RuleNode
 import stellaParser
 import stellaParserBaseVisitor

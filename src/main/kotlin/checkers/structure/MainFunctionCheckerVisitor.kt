@@ -2,7 +2,7 @@ package checkers.structure
 
 import checkers.errors.ErrorManager
 import checkers.errors.StellaErrorType
-import functionName
+import utils.functionName
 import org.antlr.v4.runtime.tree.ParseTree
 import stellaParser
 import stellaParserBaseVisitor

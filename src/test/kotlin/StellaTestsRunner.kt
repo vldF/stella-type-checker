@@ -139,11 +139,16 @@ object StellaTestsRunner {
         appendLine("An error occurred during typechecking!")
         appendLine("ERROR: $type")
 
-        val formattedArgs = args.map {
-            when (it) {
-                is ParserRuleContext -> it.toStringTree(parser)
-                is IType -> it.name
-                else -> it
+        val formattedArgs = args.map { arg ->
+            when (arg) {
+                is ParserRuleContext -> {
+                    val start = arg.start
+                    val stop = arg.stop
+
+                    parser.tokenStream.getText(start, stop)
+                }
+                is IType -> arg.name
+                else -> arg
             }
         }.map { "\n$it\n" }
         val asString = ErrorStrings.strings[type]!!.format(*formattedArgs.toTypedArray())
