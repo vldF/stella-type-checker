@@ -10,6 +10,14 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("semicolon")
     }
     @Test
+    fun nullary_function_test() {
+        StellaTestsRunner.runOkTest("nullary_function")
+    }
+    @Test
+    fun multiparameter_fun_test() {
+        StellaTestsRunner.runOkTest("multiparameter_fun")
+    }
+    @Test
     fun record_in_record_test() {
         StellaTestsRunner.runOkTest("record_in_record")
     }
@@ -78,6 +86,10 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("record_apply_to_function")
     }
     @Test
+    fun nested_functions_params_shadowing_test() {
+        StellaTestsRunner.runOkTest("nested_functions_params_shadowing")
+    }
+    @Test
     fun increment_twice_test() {
         StellaTestsRunner.runOkTest("increment_twice")
     }
@@ -100,6 +112,10 @@ class OK_TESTS {
     @Test
     fun let_if_test() {
         StellaTestsRunner.runOkTest("let_if")
+    }
+    @Test
+    fun nested_functions_test() {
+        StellaTestsRunner.runOkTest("nested_functions")
     }
     @Test
     fun variant_attempt_test() {
@@ -147,6 +163,15 @@ class ERROR_NOT_A_LIST_TESTS {
 }
 
 @Suppress("ClassName")
+class ERROR_UNEXPECTED_NUMBER_OF_PARAMETERS_IN_LAMBDA_TESTS {
+    @Test
+    fun simple_unexpected_number_test() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_NUMBER_OF_PARAMETERS_IN_LAMBDA, "simple_unexpected_number")
+    }
+    
+}
+
+@Suppress("ClassName")
 class ERROR_NONEXHAUSTIVE_MATCH_PATTERNS_TESTS {
     @Test
     fun nonexhaustive_match_test() {
@@ -177,6 +202,10 @@ class ERROR_MISSING_RECORD_FIELDS_TESTS {
     @Test
     fun record_in_record_test() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_MISSING_RECORD_FIELDS, "record_in_record")
+    }
+    @Test
+    fun call_function_with_missing_fields_test() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_MISSING_RECORD_FIELDS, "call_function_with_missing_fields")
     }
     @Test
     fun record_in_abstraction_test() {
@@ -272,10 +301,6 @@ class ERROR_UNEXPECTED_RECORD_FIELDS_TESTS {
     fun return_record_with_missing_fields_test() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_RECORD_FIELDS, "return_record_with_missing_fields")
     }
-    @Test
-    fun call_function_with_missing_fields_test() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_RECORD_FIELDS, "call_function_with_missing_fields")
-    }
     
 }
 
@@ -367,6 +392,10 @@ class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "record_dot")
     }
     @Test
+    fun nested_function_params_shadowing_test() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "nested_function_params_shadowing")
+    }
+    @Test
     fun unexpected_label_type_test() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "unexpected_label_type")
     }
@@ -399,6 +428,10 @@ class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "simple_ascription2")
     }
     @Test
+    fun unexpected_multiparam_test() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "unexpected_multiparam")
+    }
+    @Test
     fun succ_true_test() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "succ_true")
     }
@@ -413,6 +446,10 @@ class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
     @Test
     fun no_nat_rec_test() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "no_nat_rec")
+    }
+    @Test
+    fun unexpected_zero_param_test() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "unexpected_zero_param")
     }
     @Test
     fun return_lambda_with_wrong_return_test() {
@@ -433,6 +470,15 @@ class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
     @Test
     fun if_nat_test() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "if_nat")
+    }
+    
+}
+
+@Suppress("ClassName")
+class ERROR_INCORRECT_NUMBER_OF_ARGUMENTS_TESTS {
+    @Test
+    fun incorrect_num_test() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_INCORRECT_NUMBER_OF_ARGUMENTS, "incorrect_num")
     }
     
 }
@@ -524,6 +570,19 @@ class ERROR_TUPLE_INDEX_OUT_OF_BOUNDS_TESTS {
     @Test
     fun tuple_literal_test() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_TUPLE_INDEX_OUT_OF_BOUNDS, "tuple_literal")
+    }
+    
+}
+
+@Suppress("ClassName")
+class ERROR_INCORRECT_ARITY_OF_MAIN_TESTS {
+    @Test
+    fun main_with_zero_param_test() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_INCORRECT_ARITY_OF_MAIN, "main_with_zero_param")
+    }
+    @Test
+    fun main_with_two_params_test() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_INCORRECT_ARITY_OF_MAIN, "main_with_two_params")
     }
     
 }
