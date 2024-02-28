@@ -41,7 +41,7 @@ class TypeCheckerVisitor(
         val returnExpr = ctx.returnExpr
         val typeInferrer = TypeInferrer(errorManager, functionContext)
 
-        if (!dumpCheckFunctionReturnType(expectedFunctionType, returnExpr)) {
+        if (!dumpCheckFunctionReturnType(expectedFunctionType, returnExpr, functionContext)) {
             return
         }
 
@@ -69,14 +69,17 @@ class TypeCheckerVisitor(
     private fun dumpCheckFunctionReturnType(
         expected: IType,
         retExpression: ParserRuleContext,
+        functionTypeContext: TypeContext
     ): Boolean {
         val dumbTypeInferrer = DumbTypeInferrer()
 
-        val absArgSyntaxType = dumbTypeInferrer.getType(retExpression)
-        val typeInferrer = TypeInferrer(errorManager = null, typeContext)
-        val absArgSemanticType by lazy { typeInferrer.visit(retExpression) ?: UnknownType }
+        val retExpressionType = dumbTypeInferrer.getType(retExpression)
+        val absArgSemanticType by lazy {
+            val typeInferrer = TypeInferrer(errorManager = null, functionTypeContext)
+            typeInferrer.visit(retExpression) ?: UnknownType
+        }
 
-        when (absArgSyntaxType) {
+        when (retExpressionType) {
             is UnknownType -> {
                 return true // continue type checking
             }
@@ -92,12 +95,13 @@ class TypeCheckerVisitor(
                     return false
                 }
 
-                if (absArgSyntaxType != expected) {
+                if (retExpressionType.from != expected.from) {
+                    val errorNode = (retExpression as? stellaParser.AbstractionContext)?.paramDecl ?: retExpression
                     errorManager.registerError(
                         StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_PARAMETER,
-                        expected,
-                        retExpression,
-                        absArgSemanticType
+                        expected.from,
+                        (absArgSemanticType as FunctionalType).from,
+                        errorNode
                     )
                     return false
                 }

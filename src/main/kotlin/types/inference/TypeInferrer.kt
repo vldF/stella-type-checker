@@ -51,7 +51,7 @@ internal class TypeInferrer(
                 StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
                 thenType,
                 elseType,
-                ctx
+                ctx.elseExpr
             )
             return null
         }
@@ -121,11 +121,13 @@ internal class TypeInferrer(
         }
 
         if (stepFunctionType.from != NatType) {
+            val errorNode = (ctx.step as? stellaParser.AbstractionContext)?.paramDecl ?: ctx.step
+
             errorManager?.registerError(
                 StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_PARAMETER,
                 NatType,
                 stepFunctionType.from,
-                ctx.step
+                errorNode
             )
             return null
         }
