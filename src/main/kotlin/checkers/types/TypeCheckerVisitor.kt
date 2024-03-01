@@ -18,7 +18,7 @@ class TypeCheckerVisitor(
     private val typeContext = TypeContext(parentTypeContext)
 
     override fun visitProgram(ctx: stellaParser.ProgramContext) {
-        val topLevelInfoCollector = TopLevelInfoCollector(errorManager, typeContext)
+        val topLevelInfoCollector = TopLevelInfoCollector(typeContext)
         topLevelInfoCollector.visitProgram(ctx)
 
         super.visitProgram(ctx)
@@ -27,12 +27,12 @@ class TypeCheckerVisitor(
     override fun visitDeclFun(ctx: stellaParser.DeclFunContext) {
         val functionName = ctx.functionName
         val functionType = typeContext.resolveFunctionType(functionName) ?: return
-        val expectedFunctionType = functionType.to
+        val expectedFunctionRetType = functionType.to
 
         val functionContext = TypeContext(typeContext)
         functionContext.saveVariableType(ctx.paramDecl.paramName, functionType.from)
 
-        val topLevelInfoCollector = TopLevelInfoCollector(errorManager, functionContext)
+        val topLevelInfoCollector = TopLevelInfoCollector(functionContext)
         ctx.children.forEach { c -> topLevelInfoCollector.visit(c) }
 
         val innerTypeCheckerVisitor = TypeCheckerVisitor(errorManager, functionContext)
@@ -41,34 +41,16 @@ class TypeCheckerVisitor(
         val returnExpr = ctx.returnExpr
         val typeInferrer = TypeInferrer(errorManager, functionContext)
 
-        if (!dumpCheckFunctionReturnType(expectedFunctionType, returnExpr, functionContext)) {
-            return
-        }
+//        if (!dumpCheckFunctionReturnType(expectedFunctionRetType, returnExpr, functionContext)) {
+//            return
+//        }
 
-        val returnExpressionType = returnExpr.accept(typeInferrer) ?: return
-
-        if (returnExpressionType is FunctionalType && expectedFunctionType !is FunctionalType) {
-            errorManager.registerError(
-                StellaErrorType.ERROR_UNEXPECTED_LAMBDA,
-                returnExpressionType,
-                expectedFunctionType,
-                returnExpr
-            )
-        }
-
-        if (expectedFunctionType != returnExpressionType) {
-            errorManager.registerError(
-                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
-                expectedFunctionType,
-                returnExpressionType,
-                returnExpr,
-            )
-        }
+        typeInferrer.visitExpression(returnExpr, expectedFunctionRetType)
     }
 
     private fun dumpCheckFunctionReturnType(
         expected: IType,
-        retExpression: ParserRuleContext,
+        retExpression: stellaParser.ExprContext,
         functionTypeContext: TypeContext
     ): Boolean {
         val dumbTypeInferrer = DumbTypeInferrer()
@@ -76,7 +58,7 @@ class TypeCheckerVisitor(
         val retExpressionType = dumbTypeInferrer.getType(retExpression)
         val absArgSemanticType by lazy {
             val typeInferrer = TypeInferrer(errorManager = null, functionTypeContext)
-            typeInferrer.visit(retExpression) ?: UnknownType
+            typeInferrer.visitExpression(retExpression, expected) ?: UnknownType
         }
 
         when (retExpressionType) {

@@ -2,49 +2,54 @@ package types.inference
 
 import checkers.errors.ErrorManager
 import checkers.errors.StellaErrorType
+import org.antlr.v4.runtime.ParserRuleContext
 import utils.paramName
 import stellaParser
-import stellaParserBaseVisitor
 import types.*
 
 internal class TypeInferrer(
     private val errorManager: ErrorManager?,
     parentContext: TypeContext? = null
-) : stellaParserBaseVisitor<IType?>() {
+) {
     private val context = TypeContext(parentContext)
 
-    override fun visitConstTrue(ctx: stellaParser.ConstTrueContext): BoolType {
-        return BoolType
+    fun visitExpression(ctx: stellaParser.ExprContext, expectedType: IType?): IType? {
+        val type = when (ctx) {
+            is stellaParser.ConstTrueContext -> BoolType
+            is stellaParser.ConstFalseContext -> BoolType
+            is stellaParser.ConstIntContext -> NatType
+            is stellaParser.ConstUnitContext -> UnitType
+            is stellaParser.IsZeroContext -> visitIsZero(ctx)
+            is stellaParser.SuccContext -> visitSucc(ctx)
+            is stellaParser.PredContext -> visitPred(ctx)
+            is stellaParser.VarContext -> visitVar(ctx, expectedType)
+            is stellaParser.DotRecordContext -> visitDotRecord(ctx, expectedType)
+            is stellaParser.AbstractionContext -> visitAbstraction(ctx, expectedType)
+            is stellaParser.ApplicationContext -> visitApplication(ctx, expectedType)
+            is stellaParser.ParenthesisedExprContext -> visitExpression(ctx.expr_, expectedType)
+            is stellaParser.RecordContext -> visitRecord(ctx, expectedType)
+            is stellaParser.LetContext -> visitLet(ctx, expectedType)
+            is stellaParser.TypeAscContext -> visitTypeAsc(ctx, expectedType)
+            is stellaParser.NatRecContext -> visitNatRec(ctx, expectedType)
+            is stellaParser.DotTupleContext -> visitDotTuple(ctx, expectedType)
+            is stellaParser.IfContext -> visitIf(ctx, expectedType)
+            is stellaParser.TupleContext -> visitTuple(ctx, expectedType)
+            is stellaParser.TerminatingSemicolonContext -> visitExpression(ctx.expr_, expectedType)
+            else -> {
+                println("unsupported syntax for ${ctx::class.java}")
+                null
+            }
+        } ?: return null
+
+        return validateTypes(type, expectedType, ctx)
     }
 
-    override fun visitConstFalse(ctx: stellaParser.ConstFalseContext): BoolType {
-        return BoolType
-    }
-
-    override fun visitTypeNat(ctx: stellaParser.TypeNatContext?): NatType {
-        return NatType
-    }
-
-    override fun visitTypeBool(ctx: stellaParser.TypeBoolContext?): BoolType {
-        return BoolType
-    }
-
-    override fun visitIf(ctx: stellaParser.IfContext): IType? {
+    private fun visitIf(ctx: stellaParser.IfContext, expectedType: IType?): IType? {
         val condition = ctx.condition
-        val condType = condition.accept(this) ?: return null
+        visitExpression(condition, BoolType) ?: return null
 
-        if (condType != BoolType) {
-            errorManager?.registerError(
-                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
-                BoolType,
-                condType,
-                condition
-            )
-            return null
-        }
-
-        val thenType = ctx.thenExpr.accept(this) ?: return null
-        val elseType = ctx.elseExpr.accept(this) ?: return null
+        val thenType = visitExpression(ctx.thenExpr, expectedType) ?: return null
+        val elseType = visitExpression(ctx.elseExpr, expectedType) ?: return null
 
         if (elseType != thenType) {
             errorManager?.registerError(
@@ -59,56 +64,26 @@ internal class TypeInferrer(
         return thenType
     }
 
-    override fun visitConstInt(ctx: stellaParser.ConstIntContext): NatType {
+    private fun visitSucc(ctx: stellaParser.SuccContext): NatType? {
+        visitExpression(ctx.n, NatType) ?: return null
         return NatType
     }
 
-    override fun visitSucc(ctx: stellaParser.SuccContext): NatType? {
-        val innerType = ctx.n.accept(this) ?: return null
-
-        if (innerType != NatType) {
-            errorManager?.registerError(
-                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
-                NatType,
-                innerType,
-                ctx.n
-            )
-            return null
-        }
-
+    private fun visitPred(ctx: stellaParser.PredContext): NatType? {
+        visitExpression(ctx.n, NatType) ?: return null
         return NatType
     }
 
-    override fun visitIsZero(ctx: stellaParser.IsZeroContext): BoolType? {
-        val innerType = ctx.n.accept(this)
-
-        if (innerType != NatType) {
-            errorManager?.registerError(
-                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
-                NatType,
-                innerType ?: UnknownType,
-                ctx
-            )
-            return null
-        }
-
+    private fun visitIsZero(ctx: stellaParser.IsZeroContext): BoolType? {
+        visitExpression(ctx.n, NatType) ?: return null
         return BoolType
     }
 
-    override fun visitNatRec(ctx: stellaParser.NatRecContext): IType? {
-        val itersCountType = ctx.n.accept(this)
-        if (itersCountType != NatType) {
-            errorManager?.registerError(
-                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
-                NatType,
-                itersCountType ?: UnknownType,
-                ctx
-            )
-            return null
-        }
+    private fun visitNatRec(ctx: stellaParser.NatRecContext, expectedType: IType?): IType? {
+       visitExpression(ctx.n, NatType)
 
-        val initialValueType = ctx.initial.accept(this) ?: return null
-        val stepFunctionType = ctx.step.accept(this)
+        val initialValueType = visitExpression(ctx.initial, expectedType) ?: return null
+        val stepFunctionType = visitExpression(ctx.step, null)
 
         if (stepFunctionType !is FunctionalType) {
             errorManager?.registerError(
@@ -165,52 +140,59 @@ internal class TypeInferrer(
         return initialValueType
     }
 
-    override fun visitTypeFun(ctx: stellaParser.TypeFunContext): IType? {
-        val paramType = ctx.paramTypes.first().accept(this) ?: return null
-        val returnType = ctx.returnType.accept(this) ?: return null
+    private fun visitAbstraction(ctx: stellaParser.AbstractionContext, expectedType: IType?): FunctionalType? {
+        if (expectedType !is FunctionalType?) {
+            val actualType = visitExpression(ctx, null)
+            errorManager?.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_LAMBDA,
+                expectedType ?: UnknownType,
+                actualType ?: UnknownType,
+                ctx
+            )
 
-        return FunctionalType(paramType, returnType)
-    }
-
-    override fun visitAbstraction(ctx: stellaParser.AbstractionContext): FunctionalType? {
-        val newInferrer = TypeInferrer(errorManager, context)
+            return null
+        }
 
         val arg = ctx.paramDecl
-        val argType = arg.accept(newInferrer) ?: return null
+        val argType = SyntaxTypeProcessor.getType(arg.paramType)
 
         val innerContext = TypeContext(context)
         innerContext.saveVariableType(arg.paramName, argType)
-        val innerVisitor = TypeInferrer(errorManager, innerContext)
+        val innerInferrer = TypeInferrer(errorManager, innerContext)
 
         val returnExpr = ctx.returnExpr
-        val returnType = returnExpr.accept(innerVisitor) ?: return null
+        val returnType = innerInferrer.visitExpression(returnExpr, null) ?: return null
 
-        return FunctionalType(argType, returnType)
+        val result = FunctionalType(argType, returnType)
+        return validateTypes(result, expectedType, ctx) as FunctionalType?
     }
 
-    override fun visitParamDecl(ctx: stellaParser.ParamDeclContext): IType? {
+    private fun visitParamDecl(ctx: stellaParser.ParamDeclContext): IType {
         val name = ctx.name.text
-        val paramType = ctx.paramType.accept(this) ?: return null
+        val paramType = SyntaxTypeProcessor.getType(ctx.paramType)
 
         context.saveVariableType(name, paramType)
 
         return paramType
     }
 
-    override fun visitApplication(ctx: stellaParser.ApplicationContext): IType? {
+    private fun visitApplication(ctx: stellaParser.ApplicationContext, expectedType: IType?): IType? {
         val func = ctx.`fun`
-        val funType = func.accept(this) ?: return null
+
+        val funType = visitExpression(func, null)
+
         if (funType !is FunctionalType) {
             errorManager?.registerError(
                 StellaErrorType.ERROR_NOT_A_FUNCTION,
-                funType,
+                funType ?: UnknownType,
                 func
             )
             return null
         }
 
         val arg = ctx.args.first()
-        val argType = arg.accept(this) ?: return null
+        val argType = visitExpression(arg, null) ?: return null
+
         if (funType.from != argType) {
             errorManager?.registerError(
                 StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
@@ -220,10 +202,11 @@ internal class TypeInferrer(
             )
         }
 
-        return funType.to
+        val resultType = funType.to
+        return validateTypes(resultType, expectedType, ctx)
     }
 
-    override fun visitVar(ctx: stellaParser.VarContext): IType? {
+    private fun visitVar(ctx: stellaParser.VarContext, expectedType: IType?): IType? {
         val name = ctx.name.text
         val type = context.resolveVariableType(name) ?: context.resolveFunctionType(name)
 
@@ -236,22 +219,31 @@ internal class TypeInferrer(
             return null
         }
 
+        if (expectedType != null && type != expectedType) {
+            errorManager?.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
+                expectedType,
+                type,
+                ctx
+            )
+        }
+
         return type
     }
 
-    override fun visitConstUnit(ctx: stellaParser.ConstUnitContext?): UnitType {
-        return UnitType
-    }
+    private fun visitTuple(ctx: stellaParser.TupleContext, expectedType: IType?): TupleType? {
+        if (expectedType !is TupleType?) {
+            val tupleType = visitTuple(ctx, null) ?: return null
 
-    override fun visitTypeUnit(ctx: stellaParser.TypeUnitContext?): IType {
-        return UnitType
-    }
-
-    override fun visitTuple(ctx: stellaParser.TupleContext): TupleType? {
-        val content = ctx.expr()
-        val contentTypes = content.map {
-            it.accept(this)
+            errorManager?.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_TUPLE,
+                expectedType!!,
+                tupleType
+            )
         }
+
+        val content = ctx.expr()
+        val contentTypes = content.map { visitExpression(it, null) }
 
         if (contentTypes.any { it == null }) {
             return null
@@ -260,18 +252,9 @@ internal class TypeInferrer(
         return TupleType(contentTypes.filterNotNull().toTypedArray())
     }
 
-    override fun visitTypeTuple(ctx: stellaParser.TypeTupleContext): TupleType? {
-        val types = ctx.types.map { visit(it) }
-        if (types.any { it == null }) {
-            return null
-        }
-
-        return TupleType(types.filterNotNull().toTypedArray())
-    }
-
-    override fun visitDotTuple(ctx: stellaParser.DotTupleContext): IType? {
+    private fun visitDotTuple(ctx: stellaParser.DotTupleContext, expectedType: IType?): IType? {
         val expr = ctx.expr_
-        val expressionType = expr.accept(this) ?: return null
+        val expressionType = visitExpression(expr, null) ?: return null
         if (expressionType !is TupleType) {
             errorManager?.registerError(
                 StellaErrorType.ERROR_NOT_A_TUPLE,
@@ -292,54 +275,29 @@ internal class TypeInferrer(
             return null
         }
 
-        return expressionType.types[indexValue - 1]
+        val type = expressionType.types[indexValue - 1]
+        return validateTypes(type, expectedType, ctx)
     }
 
     @Suppress("DuplicatedCode")
-    override fun visitRecord(ctx: stellaParser.RecordContext): RecordType? {
+    private fun visitRecord(ctx: stellaParser.RecordContext, expectedType: IType?): RecordType? {
         val bindingsContext = ctx.bindings
         val labels = bindingsContext.map { bind -> bind.name.text }
-        val types = bindingsContext.mapNotNull { bind -> bind.rhs.accept(this) }
+        val types = bindingsContext.mapNotNull { bind -> visitExpression(bind.rhs, null) }
 
         if (labels.size != types.size) {
             return null
         }
 
-        return RecordType(labels.toTypedArray(), types.toTypedArray())
+        val result = RecordType(labels.toTypedArray(), types.toTypedArray())
+        return validateTypes(result, expectedType, ctx) as RecordType?
     }
 
-    @Suppress("DuplicatedCode")
-    override fun visitTypeRecord(ctx: stellaParser.TypeRecordContext): RecordType? {
-        val fieldContexts = ctx.fieldTypes
-        val labels = fieldContexts.map { field -> field.label.text }
-        val types = fieldContexts.mapNotNull { field -> field.type_.accept(this) }
-
-        if (labels.size != types.size) {
-            return null
-        }
-
-        return RecordType(labels.toTypedArray(), types.toTypedArray())
-    }
-
-    override fun visitDotRecord(ctx: stellaParser.DotRecordContext): IType? {
+    private fun visitDotRecord(ctx: stellaParser.DotRecordContext, expectedType: IType?): IType? {
         val expression = ctx.expr_
         val label = ctx.label.text
 
-        if (expression is stellaParser.RecordContext) {
-            val declaredLabels = expression.bindings.map { it.name.text }
-
-            if (label !in declaredLabels) {
-                errorManager?.registerError(
-                    StellaErrorType.ERROR_UNEXPECTED_FIELD_ACCESS,
-                    label,
-                    ctx
-                )
-                return null
-            }
-        }
-
-        val expressionType = expression.accept(this)
-
+        val expressionType = visitExpression(expression, null)
         if (expressionType !is RecordType) {
             errorManager?.registerError(
                 StellaErrorType.ERROR_NOT_A_RECORD,
@@ -349,38 +307,41 @@ internal class TypeInferrer(
             return null
         }
 
-        val labelIndex = expressionType.labels.indexOf(label)
-        if (labelIndex == -1) {
+
+        val declaredLabels = expressionType.labels
+        if (label !in declaredLabels) {
             errorManager?.registerError(
-                StellaErrorType.ERROR_MISSING_RECORD_FIELDS,
+                StellaErrorType.ERROR_UNEXPECTED_FIELD_ACCESS,
                 label,
                 ctx
             )
             return null
         }
 
-        return expressionType.types[labelIndex]
+        val labelIndex = declaredLabels.indexOf(label)
+        val type = expressionType.types[labelIndex]
+        return validateTypes(type, expectedType, ctx)
     }
 
-    override fun visitLet(ctx: stellaParser.LetContext): IType? {
+    private fun visitLet(ctx: stellaParser.LetContext, expectedType: IType?): IType? {
         val patternBinding = ctx.patternBinding(0)
         val name = patternBinding.pat.text
         val expression = patternBinding.rhs
 
-        val expressionType = visit(expression) ?: return null
+        val expressionType = visitExpression(expression, null) ?: return null
 
         val letContext = TypeContext(context)
         letContext.saveVariableType(name, expressionType)
 
         val letTypeInferrer = TypeInferrer(errorManager, letContext)
-        return letTypeInferrer.visit(ctx.body)
+        return letTypeInferrer.visitExpression(ctx.body, expectedType)
     }
 
-    override fun visitTypeAsc(ctx: stellaParser.TypeAscContext): IType? {
+    private fun visitTypeAsc(ctx: stellaParser.TypeAscContext, expectedType: IType?): IType? {
         val expression = ctx.expr_
-        val expressionType = expression.accept(this) ?: return null
+        val expressionType = visitExpression(expression, null) ?: return null
 
-        val targetType = ctx.type_.accept(this) ?: return null
+        val targetType = SyntaxTypeProcessor.getType(ctx.type_)
 
         if (expressionType != targetType) {
             errorManager?.registerError(
@@ -392,15 +353,86 @@ internal class TypeInferrer(
             return null
         }
 
-        return targetType
+        return validateTypes(expressionType, expectedType, ctx)
     }
 
-    override fun aggregateResult(aggregate: IType?, nextResult: IType?): IType? {
-        return when {
-            aggregate == null -> nextResult
-            aggregate == nextResult -> nextResult
-            nextResult == null -> aggregate
-            else -> error("can't aggregate types: $aggregate, $nextResult")
+    private fun validateTypes(actualType: IType, expectedType: IType?, expression: ParserRuleContext): IType? {
+        if (expectedType == null) {
+            return actualType
         }
+
+        if (actualType is FunctionalType && expectedType !is FunctionalType) {
+            errorManager?.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_LAMBDA,
+                expectedType,
+                actualType,
+                expression
+            )
+
+            return null
+        }
+
+        if (actualType is TupleType && expectedType !is TupleType) {
+            errorManager?.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_TUPLE,
+                expectedType,
+                actualType
+            )
+
+            return null
+        }
+
+        if (actualType is RecordType && expectedType !is RecordType) {
+            errorManager?.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_RECORD,
+                expectedType,
+                actualType
+            )
+
+            return null
+        }
+
+        if (actualType !is FunctionalType && expectedType is FunctionalType) {
+            errorManager?.registerError(
+                StellaErrorType.ERROR_NOT_A_FUNCTION,
+                actualType,
+                expression
+            )
+
+            return null
+        }
+
+        if (actualType !is TupleType && expectedType is TupleType) {
+            errorManager?.registerError(
+                StellaErrorType.ERROR_NOT_A_TUPLE,
+                actualType,
+                expression
+            )
+
+            return null
+        }
+
+        if (actualType !is RecordType && expectedType is RecordType) {
+            errorManager?.registerError(
+                StellaErrorType.ERROR_NOT_A_RECORD,
+                actualType,
+                expression
+            )
+
+            return null
+        }
+
+        if (actualType != expectedType) {
+            errorManager?.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
+                expectedType,
+                actualType,
+                expression
+            )
+
+            return null
+        }
+
+        return actualType
     }
 }
