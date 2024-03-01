@@ -11,4 +11,6 @@ jobs:
         with:
           submodules: 'true'
       - name: Run test
-        run: ./gradlew test
+        env:
+          ENABLE_ONLY_SUPPORTED_TESTS: true
+        run:  ./gradlew test

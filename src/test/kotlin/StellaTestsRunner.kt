@@ -81,7 +81,7 @@ object StellaTestsRunner {
         val unsupportedExtensions = testExtensions - supportedExtensions
 
         Assumptions.assumeTrue(
-            enableOnlySupportedTests() || unsupportedExtensions.isEmpty(),
+            !enableOnlySupportedTests() || unsupportedExtensions.isEmpty(),
             "unsupported extensions were found: $unsupportedExtensions"
         )
 
@@ -190,6 +190,6 @@ object StellaTestsRunner {
     }
 
     private fun enableOnlySupportedTests(): Boolean {
-        return System.getenv()["ENABLE_ALL_TESTS"]?.toBoolean() == true
+        return System.getenv()["ENABLE_ONLY_SUPPORTED_TESTS"]?.toBoolean() == true
     }
 }
