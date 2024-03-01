@@ -10,6 +10,10 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("semicolon")
     }
     @Test
+    fun exhaustive_unit_var_test() {
+        StellaTestsRunner.runOkTest("exhaustive_unit_var")
+    }
+    @Test
     fun nullary_function_test() {
         StellaTestsRunner.runOkTest("nullary_function")
     }
@@ -30,8 +34,16 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("simple_records")
     }
     @Test
+    fun exhaustive_unit_test() {
+        StellaTestsRunner.runOkTest("exhaustive_unit")
+    }
+    @Test
     fun simple_sum_test() {
         StellaTestsRunner.runOkTest("simple_sum")
+    }
+    @Test
+    fun exhaustive_tuple_test() {
+        StellaTestsRunner.runOkTest("exhaustive_tuple")
     }
     @Test
     fun let_let_test() {
@@ -70,8 +82,24 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("int_literal")
     }
     @Test
+    fun exhaustive_nat_constructors_test() {
+        StellaTestsRunner.runOkTest("exhaustive_nat_constructors")
+    }
+    @Test
     fun let_square_test() {
         StellaTestsRunner.runOkTest("let_square")
+    }
+    @Test
+    fun exhaustive_fun_test() {
+        StellaTestsRunner.runOkTest("exhaustive_fun")
+    }
+    @Test
+    fun nullary_variant_test() {
+        StellaTestsRunner.runOkTest("nullary_variant")
+    }
+    @Test
+    fun exhaustive_variant_test() {
+        StellaTestsRunner.runOkTest("exhaustive_variant")
     }
     @Test
     fun list_operations_test() {
@@ -84,6 +112,14 @@ class OK_TESTS {
     @Test
     fun record_apply_to_function_test() {
         StellaTestsRunner.runOkTest("record_apply_to_function")
+    }
+    @Test
+    fun exhaustive_record_test() {
+        StellaTestsRunner.runOkTest("exhaustive_record")
+    }
+    @Test
+    fun exhaustive_sum_test() {
+        StellaTestsRunner.runOkTest("exhaustive_sum")
     }
     @Test
     fun nested_functions_params_shadowing_test() {
@@ -102,6 +138,10 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("simple_pair")
     }
     @Test
+    fun exhaustive_list_test() {
+        StellaTestsRunner.runOkTest("exhaustive_list")
+    }
+    @Test
     fun list_ascription_test() {
         StellaTestsRunner.runOkTest("list_ascription")
     }
@@ -116,6 +156,14 @@ class OK_TESTS {
     @Test
     fun nested_functions_test() {
         StellaTestsRunner.runOkTest("nested_functions")
+    }
+    @Test
+    fun exhaustive_nested_tuple_test() {
+        StellaTestsRunner.runOkTest("exhaustive_nested_tuple")
+    }
+    @Test
+    fun exhaustive_bool_test() {
+        StellaTestsRunner.runOkTest("exhaustive_bool")
     }
     @Test
     fun variant_attempt_test() {
@@ -163,6 +211,15 @@ class ERROR_NOT_A_LIST_TESTS {
 }
 
 @Suppress("ClassName")
+class ERROR_UNEXPECTED_NON_NULLARY_VARIANT_PATTERN_TESTS {
+    @Test
+    fun simple_test() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_NON_NULLARY_VARIANT_PATTERN, "simple")
+    }
+    
+}
+
+@Suppress("ClassName")
 class ERROR_UNEXPECTED_NUMBER_OF_PARAMETERS_IN_LAMBDA_TESTS {
     @Test
     fun simple_unexpected_number_test() {
@@ -174,12 +231,52 @@ class ERROR_UNEXPECTED_NUMBER_OF_PARAMETERS_IN_LAMBDA_TESTS {
 @Suppress("ClassName")
 class ERROR_NONEXHAUSTIVE_MATCH_PATTERNS_TESTS {
     @Test
+    fun ne_sum_nat_test() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS, "ne_sum_nat")
+    }
+    @Test
+    fun ne_list_test() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS, "ne_list")
+    }
+    @Test
+    fun ne_nat_1_test() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS, "ne_nat_1")
+    }
+    @Test
+    fun ne_bool_test() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS, "ne_bool")
+    }
+    @Test
+    fun ne_nat_4_test() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS, "ne_nat_4")
+    }
+    @Test
+    fun ne_sum_test() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS, "ne_sum")
+    }
+    @Test
+    fun ne_nat_3_test() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS, "ne_nat_3")
+    }
+    @Test
+    fun ne_nat_2_test() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS, "ne_nat_2")
+    }
+    @Test
     fun nonexhaustive_match_test() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS, "nonexhaustive_match")
     }
     @Test
     fun nonexhaustive_variant_test() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS, "nonexhaustive_variant")
+    }
+    @Test
+    fun ne_record_test() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS, "ne_record")
+    }
+    @Test
+    fun ne_tuple_test() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS, "ne_tuple")
     }
     
 }
@@ -289,6 +386,10 @@ class ERROR_UNEXPECTED_TUPLE_LENGTH_TESTS {
 @Suppress("ClassName")
 class ERROR_UNEXPECTED_VARIANT_LABEL_TESTS {
     @Test
+    fun unexpected_nullary_label_test() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_VARIANT_LABEL, "unexpected_nullary_label")
+    }
+    @Test
     fun simple_unexpected_label_test() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_VARIANT_LABEL, "simple_unexpected_label")
     }
@@ -340,6 +441,15 @@ class ERROR_UNEXPECTED_INJECTION_TESTS {
 }
 
 @Suppress("ClassName")
+class ERROR_UNEXPECTED_DATA_FOR_NULLARY_LABEL_TESTS {
+    @Test
+    fun simple_test() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_DATA_FOR_NULLARY_LABEL, "simple")
+    }
+    
+}
+
+@Suppress("ClassName")
 class ERROR_UNEXPECTED_LIST_TESTS {
     @Test
     fun simple_test() {
@@ -361,6 +471,15 @@ class ERROR_UNEXPECTED_TYPE_FOR_PARAMETER_TESTS {
     @Test
     fun return_lambda_with_wrong_argument_test() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_PARAMETER, "return_lambda_with_wrong_argument")
+    }
+    
+}
+
+@Suppress("ClassName")
+class ERROR_UNEXPECTED_NULLARY_VARIANT_PATTERN_TESTS {
+    @Test
+    fun simple_test() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_NULLARY_VARIANT_PATTERN, "simple")
     }
     
 }
@@ -548,6 +667,15 @@ class ERROR_UNEXPECTED_VARIANT_TESTS {
     @Test
     fun simple_unexpected_variant_test() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_VARIANT, "simple_unexpected_variant")
+    }
+    
+}
+
+@Suppress("ClassName")
+class ERROR_MISSING_DATA_FOR_LABEL_TESTS {
+    @Test
+    fun simple_test() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_MISSING_DATA_FOR_LABEL, "simple")
     }
     
 }
