@@ -74,6 +74,10 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("let_bool")
     }
     @Test
+    fun fix_from_arg_test() {
+        StellaTestsRunner.runOkTest("fix_from_arg")
+    }
+    @Test
     fun let_isempty_test() {
         StellaTestsRunner.runOkTest("let_isempty")
     }
@@ -517,6 +521,10 @@ class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
     @Test
     fun unexpected_label_type_test() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "unexpected_label_type")
+    }
+    @Test
+    fun fix_from_arg_test() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "fix_from_arg")
     }
     @Test
     fun int_literal_test() {

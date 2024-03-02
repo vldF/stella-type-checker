@@ -35,6 +35,7 @@ internal class TypeInferrer(
             is stellaParser.IfContext -> visitIf(ctx, expectedType)
             is stellaParser.TupleContext -> visitTuple(ctx, expectedType)
             is stellaParser.TerminatingSemicolonContext -> visitExpression(ctx.expr_, expectedType)
+            is stellaParser.FixContext -> visitFix(ctx, expectedType)
             else -> {
                 println("unsupported syntax for ${ctx::class.java}")
                 null
@@ -445,5 +446,38 @@ internal class TypeInferrer(
         }
 
         return actualType
+    }
+
+    private fun visitFix(ctx: stellaParser.FixContext, expectedType: IType?): IType? {
+        val expression = ctx.expr_
+
+        val expressionType = if (expectedType != null) {
+            visitExpression(expression, FunctionalType(expectedType, expectedType))
+        } else {
+            visitExpression(expression, null)
+        } ?: return null
+
+        if (expressionType !is FunctionalType) {
+            errorManager?.registerError(
+                StellaErrorType.ERROR_NOT_A_FUNCTION,
+                expressionType,
+                expression
+            )
+
+            return null
+        }
+
+        if (expressionType.from != expressionType.to) {
+            errorManager?.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
+                FunctionalType(expressionType.from, expressionType.from),
+                expressionType,
+                expression
+            )
+
+            return null
+        }
+
+        return expressionType.to
     }
 }
