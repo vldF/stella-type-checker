@@ -422,6 +422,17 @@ internal class TypeInferrer(
             return null
         }
 
+        if (actualType is TupleType && expectedType is TupleType) {
+            if (actualType.arity != expectedType.arity) {
+                errorManager?.registerError(
+                    StellaErrorType.ERROR_UNEXPECTED_TUPLE_LENGTH,
+                    expectedType.arity,
+                    actualType.arity,
+                    expression
+                )
+            }
+        }
+
         if (actualType != expectedType) {
             errorManager?.registerError(
                 StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,

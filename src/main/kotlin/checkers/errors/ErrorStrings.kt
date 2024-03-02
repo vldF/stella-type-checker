@@ -19,7 +19,7 @@ object ErrorStrings {
         StellaErrorType.ERROR_UNEXPECTED_RECORD_FIELDS to "unexpected record field %s in record %s",
         StellaErrorType.ERROR_UNEXPECTED_FIELD_ACCESS to "unexpected field access %s in record %s",
         StellaErrorType.ERROR_TUPLE_INDEX_OUT_OF_BOUNDS to "tuple index %s is out of bounds %s",
-        StellaErrorType.ERROR_UNEXPECTED_TUPLE_LENGTH to "unexpected tuple length %s of tuple with length %s",
+        StellaErrorType.ERROR_UNEXPECTED_TUPLE_LENGTH to "expected %s components for a tuple but got %s in tuple %s",
         StellaErrorType.ERROR_AMBIGUOUS_SUM_TYPE to "TODO",
         StellaErrorType.ERROR_AMBIGUOUS_LIST to "TODO",
         StellaErrorType.ERROR_ILLEGAL_EMPTY_MATCHING to "TODO",
