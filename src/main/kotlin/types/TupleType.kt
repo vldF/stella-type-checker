@@ -12,8 +12,6 @@ class TupleType(
         "UnknownTuple"
     }
 
-    internal constructor(isKnownType: Boolean = true) : this(arrayOf(), isKnownType)
-
     override fun equals(other: Any?): Boolean {
         if (!isKnownType || other is IType && !other.isKnownType) {
             return true

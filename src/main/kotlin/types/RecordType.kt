@@ -9,8 +9,6 @@ class RecordType(
         check(labels.size == types.size)
     }
 
-    internal constructor(isKnownType: Boolean = true) : this(arrayOf(), arrayOf(), isKnownType)
-
     override val name: String = if (isKnownType) {
         labels
             .zip(types)
