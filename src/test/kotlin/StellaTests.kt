@@ -46,6 +46,10 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("exhaustive_tuple")
     }
     @Test
+    fun variant_asc_test() {
+        StellaTestsRunner.runOkTest("variant_asc")
+    }
+    @Test
     fun let_let_test() {
         StellaTestsRunner.runOkTest("let_let")
     }
@@ -390,6 +394,10 @@ class ERROR_UNEXPECTED_TUPLE_LENGTH_TESTS {
 @Suppress("ClassName")
 class ERROR_UNEXPECTED_VARIANT_LABEL_TESTS {
     @Test
+    fun variant_asc_test() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_VARIANT_LABEL, "variant_asc")
+    }
+    @Test
     fun unexpected_nullary_label_test() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_VARIANT_LABEL, "unexpected_nullary_label")
     }
@@ -613,8 +621,16 @@ class ERROR_INCORRECT_NUMBER_OF_ARGUMENTS_TESTS {
 @Suppress("ClassName")
 class ERROR_UNEXPECTED_PATTERN_FOR_TYPE_TESTS {
     @Test
+    fun variant_asc_2_test() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_PATTERN_FOR_TYPE, "variant_asc_2")
+    }
+    @Test
     fun variant_unexpected_pattern_test() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_PATTERN_FOR_TYPE, "variant_unexpected_pattern")
+    }
+    @Test
+    fun variant_asc_test() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_PATTERN_FOR_TYPE, "variant_asc")
     }
     @Test
     fun unexpected_pattern_test() {
