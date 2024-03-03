@@ -39,6 +39,7 @@ internal class TypeInferrer(
             is stellaParser.MatchContext -> visitMatch(ctx, expectedType)
             is stellaParser.InlContext -> visitInl(ctx, expectedType)
             is stellaParser.InrContext -> visitInr(ctx, expectedType)
+            is stellaParser.VariantContext -> visitVariant(ctx, expectedType)
             else -> {
                 println("unsupported syntax for ${ctx::class.java}")
                 null
@@ -517,6 +518,7 @@ internal class TypeInferrer(
 
         for (case in cases) {
             val caseContext = TypeContext(context)
+            val caseInferrer = TypeInferrer(errorManager, caseContext)
 
             val pattern = case.pattern_
             val bodyExpr = case.expr_
@@ -529,8 +531,7 @@ internal class TypeInferrer(
                     val type = expressionType.left
                     caseContext.saveVariableType(variableName, type)
 
-                    val newInferrer = TypeInferrer(errorManager, caseContext)
-                    newInferrer.visitExpression(bodyExpr, expectedType)
+                    caseInferrer.visitExpression(bodyExpr, expectedType)
                 }
 
                 is stellaParser.PatternInrContext -> {
@@ -539,13 +540,34 @@ internal class TypeInferrer(
                     val type = expressionType.right
                     caseContext.saveVariableType(variableName, type)
 
-                    val newInferrer = TypeInferrer(errorManager, caseContext)
-                    newInferrer.visitExpression(bodyExpr, expectedType)
+                    caseInferrer.visitExpression(bodyExpr, expectedType)
+                }
+
+                is stellaParser.PatternVariantContext -> {
+                    expressionType as VariantType
+                    val labelName = pattern.label.text
+                    val labelIndex = expressionType.labels.indexOf(labelName)
+                    if (labelIndex == -1) {
+                        errorManager?.registerError(
+                            StellaErrorType.ERROR_UNEXPECTED_VARIANT_LABEL,
+                            labelName,
+                            pattern,
+                            expectedType ?: UnknownType
+                        )
+
+                        return null
+                    }
+                    val labelType = expressionType.types[labelIndex]
+
+                    val variableName = (pattern.pattern_ as? stellaParser.PatternVarContext)?.name?.text ?: return null
+
+                    caseContext.saveVariableType(variableName, labelType)
+
+                    caseInferrer.visitExpression(bodyExpr, expectedType)
                 }
 
                 else -> { // todo
-                    val newInferrer = TypeInferrer(errorManager, context)
-                    newInferrer.visitExpression(bodyExpr, expectedType)
+                    caseInferrer.visitExpression(bodyExpr, expectedType)
                 }
             }
 
@@ -572,6 +594,7 @@ internal class TypeInferrer(
             UnitType -> areUnitPatternsExhaustive(patterns)
             is TupleType -> TODO()
             is RecordType -> TODO()
+            is VariantType -> areVariantPatternsExhaustive(patterns, type)
             is FunctionalType -> false // only var can match with a functional type
             UnknownType -> error("wrong type $type")
         }
@@ -595,6 +618,13 @@ internal class TypeInferrer(
         return patterns.any { it is stellaParser.PatternUnitContext }
     }
 
+    private fun areVariantPatternsExhaustive(patterns: List<stellaParser.PatternContext>, type: VariantType): Boolean {
+        val labelsInPattern = patterns.filterIsInstance<stellaParser.PatternVariantContext>().map { it.label.text }
+        val labelsInType = type.labels.toSet()
+
+        return labelsInPattern.toSet().containsAll(labelsInType)
+    }
+
     private fun hasAny(patterns: List<stellaParser.PatternContext>): Boolean {
         return patterns.any { it is stellaParser.PatternVarContext }
     }
@@ -605,6 +635,7 @@ internal class TypeInferrer(
             NatType -> findWrongNatPatter(patterns)
             is SumType -> findWrongSumPatter(patterns)
             UnitType -> findWrongUnitPatter(patterns)
+            is VariantType -> findWrongVariantPatter(patterns, type)
             is TupleType -> TODO()
             is RecordType -> TODO()
             is FunctionalType -> findWrongFunctionalPatter(patterns)
@@ -623,8 +654,7 @@ internal class TypeInferrer(
     private fun findWrongNatPatter(patterns: List<stellaParser.PatternContext>): stellaParser.PatternContext? {
         return patterns.firstOrNull {
             it !is stellaParser.PatternIntContext &&
-            !(it is stellaParser.PatternSuccContext &&
-            it.pattern_ is stellaParser.PatternVarContext) &&
+            !(it is stellaParser.PatternSuccContext && it.pattern_ is stellaParser.PatternVarContext) &&
             it !is stellaParser.PatternVarContext
         }
     }
@@ -646,6 +676,14 @@ internal class TypeInferrer(
 
     private fun findWrongFunctionalPatter(patterns: List<stellaParser.PatternContext>): stellaParser.PatternContext? {
         return patterns.firstOrNull { it !is stellaParser.PatternVarContext }
+    }
+
+    private fun findWrongVariantPatter(patterns: List<stellaParser.PatternContext>, type: VariantType): stellaParser.PatternContext? {
+        val labelsInType = type.labels.toSet()
+        return patterns.firstOrNull {
+            it !is stellaParser.PatternVarContext &&
+            !(it is stellaParser.PatternVariantContext && it.label.text in labelsInType)
+        }
     }
 
     @Suppress("DuplicatedCode")
@@ -694,6 +732,41 @@ internal class TypeInferrer(
         }
 
         visitExpression(ctx.expr_, expectedType.right) ?: return null
+
+        return expectedType
+    }
+
+    private fun visitVariant(ctx: stellaParser.VariantContext, expectedType: IType?): VariantType? {
+        if (expectedType == null) {
+            error("can't infer type of variant ${ctx.toStringTree()}")
+        }
+
+        if (expectedType !is VariantType) {
+            errorManager?.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_VARIANT,
+                expectedType
+            )
+
+            return null
+        }
+
+        val label = ctx.label.text
+        val labelIndex = expectedType.labels.indexOf(label)
+        if (labelIndex == -1) {
+            errorManager?.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_VARIANT_LABEL,
+                label,
+                ctx,
+                expectedType
+            )
+
+            return null
+        }
+
+        val expectedExpressionType = expectedType.types[labelIndex]
+
+        val expression = ctx.rhs
+        visitExpression(expression, expectedExpressionType)
 
         return expectedType
     }

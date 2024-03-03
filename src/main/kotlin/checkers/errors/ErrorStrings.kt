@@ -25,5 +25,8 @@ object ErrorStrings {
         StellaErrorType.ERROR_ILLEGAL_EMPTY_MATCHING to "empty alternatives list for %s",
         StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS to "non-exhaustive patterns for type %s",
         StellaErrorType.ERROR_UNEXPECTED_PATTERN_FOR_TYPE to "unexpected pattern %s for type %s",
+        StellaErrorType.ERROR_UNEXPECTED_VARIANT_LABEL to "unexpected variant label %s in %s of type %s",
+        StellaErrorType.ERROR_UNEXPECTED_VARIANT to "expected type %s but got variant variant type",
+        StellaErrorType.ERROR_AMBIGUOUS_VARIANT_TYPE to "can't infer injection type of variant %s"
     )
 }
