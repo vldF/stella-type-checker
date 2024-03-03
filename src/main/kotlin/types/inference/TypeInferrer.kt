@@ -335,9 +335,9 @@ internal class TypeInferrer(
 
     private fun visitTypeAsc(ctx: stellaParser.TypeAscContext, expectedType: IType?): IType? {
         val expression = ctx.expr_
-        val expressionType = visitExpression(expression, null) ?: return null
-
         val targetType = SyntaxTypeProcessor.getType(ctx.type_)
+
+        val expressionType = visitExpression(expression, expectedType ?: targetType) ?: return null
 
         if (expressionType != targetType) {
             errorManager?.registerError(
