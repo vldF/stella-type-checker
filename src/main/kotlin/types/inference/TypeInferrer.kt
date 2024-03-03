@@ -572,8 +572,8 @@ internal class TypeInferrer(
             UnitType -> areUnitPatternsExhaustive(patterns)
             is TupleType -> TODO()
             is RecordType -> TODO()
+            is FunctionalType -> false // only var can match with a functional type
             UnknownType -> error("wrong type $type")
-            is FunctionalType -> error("wrong type $type")
         }
     }
 
@@ -607,8 +607,8 @@ internal class TypeInferrer(
             UnitType -> findWrongUnitPatter(patterns)
             is TupleType -> TODO()
             is RecordType -> TODO()
+            is FunctionalType -> findWrongFunctionalPatter(patterns)
             UnknownType -> error("wrong type $type")
-            is FunctionalType -> error("wrong type $type")
         }
     }
 
@@ -642,6 +642,10 @@ internal class TypeInferrer(
             it !is stellaParser.PatternUnitContext &&
             it !is stellaParser.PatternVarContext
         }
+    }
+
+    private fun findWrongFunctionalPatter(patterns: List<stellaParser.PatternContext>): stellaParser.PatternContext? {
+        return patterns.firstOrNull { it !is stellaParser.PatternVarContext }
     }
 
     @Suppress("DuplicatedCode")
