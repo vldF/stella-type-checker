@@ -36,6 +36,9 @@ internal class TypeInferrer(
             is stellaParser.TupleContext -> visitTuple(ctx, expectedType)
             is stellaParser.TerminatingSemicolonContext -> visitExpression(ctx.expr_, expectedType)
             is stellaParser.FixContext -> visitFix(ctx, expectedType)
+            is stellaParser.MatchContext -> visitMatch(ctx, expectedType)
+            is stellaParser.InlContext -> visitInl(ctx, expectedType)
+            is stellaParser.InrContext -> visitInr(ctx, expectedType)
             else -> {
                 println("unsupported syntax for ${ctx::class.java}")
                 null
@@ -168,15 +171,6 @@ internal class TypeInferrer(
         return validateTypes(result, expectedType, ctx) as FunctionalType?
     }
 
-    private fun visitParamDecl(ctx: stellaParser.ParamDeclContext): IType {
-        val name = ctx.name.text
-        val paramType = SyntaxTypeProcessor.getType(ctx.paramType)
-
-        context.saveVariableType(name, paramType)
-
-        return paramType
-    }
-
     private fun visitApplication(ctx: stellaParser.ApplicationContext, expectedType: IType?): IType? {
         val func = ctx.`fun`
 
@@ -192,16 +186,16 @@ internal class TypeInferrer(
         }
 
         val arg = ctx.args.first()
-        val argType = visitExpression(arg, null) ?: return null
+        visitExpression(arg, funType.from) ?: return null
 
-        if (funType.from != argType) {
-            errorManager?.registerError(
-                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
-                funType.from,
-                argType,
-                arg
-            )
-        }
+//        if (funType.from != argType) {
+//            errorManager?.registerError(
+//                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
+//                funType.from,
+//                argType,
+//                arg
+//            )
+//        }
 
         val resultType = funType.to
         return validateTypes(resultType, expectedType, ctx)
@@ -479,5 +473,224 @@ internal class TypeInferrer(
         }
 
         return expressionType.to
+    }
+
+    private fun visitMatch(ctx: stellaParser.MatchContext, expectedType: IType?): IType? {
+        val expression = ctx.expr_
+        val expressionType = visitExpression(expression, null) ?: return null
+
+        val cases = ctx.cases
+
+        if (cases.isEmpty()) {
+            errorManager?.registerError(
+                StellaErrorType.ERROR_ILLEGAL_EMPTY_MATCHING,
+                ctx
+            )
+
+            return null
+        }
+
+        val patterns = cases.map { it.pattern_ }
+
+        val wrongPattern = findWrongPatter(patterns, expressionType)
+        if (wrongPattern != null) {
+            errorManager?.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_PATTERN_FOR_TYPE,
+                wrongPattern,
+                ctx
+            )
+
+            return null
+        }
+
+        val arePatternsExhaustive = arePatternsExhaustive(patterns, expressionType)
+        if (!arePatternsExhaustive) {
+            errorManager?.registerError(
+                StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS,
+                expressionType
+            )
+
+            return null
+        }
+
+        var resultType: IType? = null
+
+        for (case in cases) {
+            val caseContext = TypeContext(context)
+
+            val pattern = case.pattern_
+            val bodyExpr = case.expr_
+
+            @Suppress("DuplicatedCode")
+            val caseType = when (pattern) {
+                is stellaParser.PatternInlContext -> {
+                    expressionType as SumType
+                    val variableName = (pattern.pattern_ as? stellaParser.PatternVarContext)?.name?.text ?: return null
+                    val type = expressionType.left
+                    caseContext.saveVariableType(variableName, type)
+
+                    val newInferrer = TypeInferrer(errorManager, caseContext)
+                    newInferrer.visitExpression(bodyExpr, expectedType)
+                }
+
+                is stellaParser.PatternInrContext -> {
+                    expressionType as SumType
+                    val variableName = (pattern.pattern_ as? stellaParser.PatternVarContext)?.name?.text ?: return null
+                    val type = expressionType.right
+                    caseContext.saveVariableType(variableName, type)
+
+                    val newInferrer = TypeInferrer(errorManager, caseContext)
+                    newInferrer.visitExpression(bodyExpr, expectedType)
+                }
+
+                else -> { // todo
+                    val newInferrer = TypeInferrer(errorManager, context)
+                    newInferrer.visitExpression(bodyExpr, expectedType)
+                }
+            }
+
+            if (resultType != null && resultType != caseType) {
+                errorManager?.registerError(
+                    StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
+                    resultType,
+                    caseType ?: UnknownType,
+                    bodyExpr
+                )
+            }
+
+            resultType = caseType
+        }
+
+        return resultType
+    }
+
+    private fun arePatternsExhaustive(patterns: List<stellaParser.PatternContext>, type: IType): Boolean {
+        return hasAny(patterns) || when (type) {
+            BoolType -> areBoolPatternsExhaustive(patterns)
+            NatType -> areNatPatternsExhaustive(patterns)
+            is SumType -> areSumPatternsExhaustive(patterns)
+            UnitType -> areUnitPatternsExhaustive(patterns)
+            is TupleType -> TODO()
+            is RecordType -> TODO()
+            UnknownType -> error("wrong type $type")
+            is FunctionalType -> error("wrong type $type")
+        }
+    }
+
+    private fun areBoolPatternsExhaustive(patterns: List<stellaParser.PatternContext>): Boolean {
+        return patterns.any { it is stellaParser.PatternTrueContext }
+                && patterns.any { it is stellaParser.PatternFalseContext }
+    }
+
+    private fun areNatPatternsExhaustive(patterns: List<stellaParser.PatternContext>): Boolean {
+        return patterns.any { it is stellaParser.PatternIntContext }
+                && patterns.any { it is stellaParser.PatternSuccContext && it.pattern_ is stellaParser.PatternVarContext }
+    }
+
+    private fun areSumPatternsExhaustive(patterns: List<stellaParser.PatternContext>): Boolean {
+        return patterns.any { it is stellaParser.PatternInlContext } && patterns.any { it is stellaParser.PatternInrContext }
+    }
+
+    private fun areUnitPatternsExhaustive(patterns: List<stellaParser.PatternContext>): Boolean {
+        return patterns.any { it is stellaParser.PatternUnitContext }
+    }
+
+    private fun hasAny(patterns: List<stellaParser.PatternContext>): Boolean {
+        return patterns.any { it is stellaParser.PatternVarContext }
+    }
+
+    private fun findWrongPatter(patterns: List<stellaParser.PatternContext>, type: IType): stellaParser.PatternContext? {
+        return when (type) {
+            BoolType -> findWrongBoolPatter(patterns)
+            NatType -> findWrongNatPatter(patterns)
+            is SumType -> findWrongSumPatter(patterns)
+            UnitType -> findWrongUnitPatter(patterns)
+            is TupleType -> TODO()
+            is RecordType -> TODO()
+            UnknownType -> error("wrong type $type")
+            is FunctionalType -> error("wrong type $type")
+        }
+    }
+
+    private fun findWrongBoolPatter(patterns: List<stellaParser.PatternContext>): stellaParser.PatternContext? {
+        return patterns.firstOrNull {
+            it !is stellaParser.PatternTrueContext &&
+            it !is stellaParser.PatternFalseContext &&
+            it !is stellaParser.PatternVarContext
+        }
+    }
+
+    private fun findWrongNatPatter(patterns: List<stellaParser.PatternContext>): stellaParser.PatternContext? {
+        return patterns.firstOrNull {
+            it !is stellaParser.PatternIntContext &&
+            !(it is stellaParser.PatternSuccContext &&
+            it.pattern_ is stellaParser.PatternVarContext) &&
+            it !is stellaParser.PatternVarContext
+        }
+    }
+
+    private fun findWrongSumPatter(patterns: List<stellaParser.PatternContext>): stellaParser.PatternContext? {
+        return patterns.firstOrNull {
+            it !is stellaParser.PatternInlContext &&
+            it !is stellaParser.PatternInrContext &&
+            it !is stellaParser.PatternVarContext
+        }
+    }
+
+    private fun findWrongUnitPatter(patterns: List<stellaParser.PatternContext>): stellaParser.PatternContext? {
+        return patterns.firstOrNull {
+            it !is stellaParser.PatternUnitContext &&
+            it !is stellaParser.PatternVarContext
+        }
+    }
+
+    @Suppress("DuplicatedCode")
+    private fun visitInl(ctx: stellaParser.InlContext, expectedType: IType?): IType? {
+        if (expectedType == null) {
+            errorManager?.registerError(
+                StellaErrorType.ERROR_AMBIGUOUS_SUM_TYPE,
+                ctx
+            )
+
+            return null
+        }
+
+        if (expectedType !is SumType) {
+            errorManager?.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_INJECTION,
+                expectedType
+            )
+
+            return null
+        }
+
+        visitExpression(ctx.expr_, expectedType.left) ?: return null
+
+        return expectedType
+    }
+
+    @Suppress("DuplicatedCode")
+    private fun visitInr(ctx: stellaParser.InrContext, expectedType: IType?): IType? {
+        if (expectedType == null) {
+            errorManager?.registerError(
+                StellaErrorType.ERROR_AMBIGUOUS_SUM_TYPE,
+                ctx
+            )
+
+            return null
+        }
+
+        if (expectedType !is SumType) {
+            errorManager?.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_INJECTION,
+                expectedType
+            )
+
+            return null
+        }
+
+        visitExpression(ctx.expr_, expectedType.right) ?: return null
+
+        return expectedType
     }
 }

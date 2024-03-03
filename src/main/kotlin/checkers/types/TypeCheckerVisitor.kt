@@ -1,15 +1,12 @@
 package checkers.types
 
 import checkers.errors.ErrorManager
-import checkers.errors.StellaErrorType
-import utils.functionName
-import org.antlr.v4.runtime.ParserRuleContext
-import utils.paramName
 import stellaParser
 import stellaParserBaseVisitor
-import types.*
-import types.inference.DumbTypeInferrer
+import types.TypeContext
 import types.inference.TypeInferrer
+import utils.functionName
+import utils.paramName
 
 class TypeCheckerVisitor(
     private val errorManager: ErrorManager,

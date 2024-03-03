@@ -23,6 +23,7 @@ object StellaTestsRunner {
         StellaExtension.TypeAscriptions,
         StellaExtension.NestedFunctionDeclarations,
         StellaExtension.FixpointCombinator,
+        StellaExtension.SumTypes,
     )
 
     fun runOkTest(testName: String) {

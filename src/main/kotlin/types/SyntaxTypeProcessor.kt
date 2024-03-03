@@ -10,6 +10,7 @@ object SyntaxTypeProcessor {
             is stellaParser.TypeRecordContext -> visitTypeRecord(ctx)
             is stellaParser.TypeFunContext -> visitTypeFun(ctx)
             is stellaParser.TypeParensContext -> getType(ctx.type_)
+            is stellaParser.TypeSumContext -> visitSumType(ctx)
             else -> UnknownType
         }
     }
@@ -33,5 +34,12 @@ object SyntaxTypeProcessor {
         val returnType = getType(ctx.returnType)
 
         return FunctionalType(paramType, returnType)
+    }
+
+    private fun visitSumType(ctx: stellaParser.TypeSumContext): SumType {
+        val left = getType(ctx.left)
+        val right = getType(ctx.right)
+
+        return SumType(left, right)
     }
 }
