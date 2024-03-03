@@ -1,8 +1,8 @@
 package types
 
 class RecordType(
-    val labels: Array<String>,
-    val types: Array<IType>,
+    val labels: List<String>,
+    val types: List<IType>,
     isKnownType: Boolean = true
 ) : IType(isKnownType) {
     init {
@@ -26,12 +26,12 @@ class RecordType(
             return false
         }
 
-        return this.labels contentEquals other.labels && this.types contentEquals other.types
+        return this.labels == other.labels && this.types == other.types
     }
 
     override fun hashCode(): Int {
-        var result = labels.contentHashCode()
-        result = 31 * result + types.contentHashCode()
+        var result = labels.hashCode()
+        result = 31 * result + types.hashCode()
         return result
     }
 }

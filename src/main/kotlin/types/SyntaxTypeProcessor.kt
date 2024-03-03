@@ -18,7 +18,7 @@ object SyntaxTypeProcessor {
     private fun visitTypeTuple(ctx: stellaParser.TypeTupleContext): TupleType {
         val types = ctx.types.map { getType(it) }
 
-        return TupleType(types.toTypedArray())
+        return TupleType(types)
     }
 
     private fun visitTypeRecord(ctx: stellaParser.TypeRecordContext): RecordType {
@@ -26,7 +26,7 @@ object SyntaxTypeProcessor {
         val labels = fieldContexts.map { field -> field.label.text }
         val types = fieldContexts.map { field -> getType(field.type_) }
 
-        return RecordType(labels.toTypedArray(), types.toTypedArray())
+        return RecordType(labels, types)
     }
 
     private fun visitTypeFun(ctx: stellaParser.TypeFunContext): FunctionalType {

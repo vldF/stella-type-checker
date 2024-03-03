@@ -1,7 +1,7 @@
 package types
 
 class TupleType(
-    val types: Array<IType>,
+    val types: List<IType>,
     isKnownType: Boolean = true
 ) : IType(isKnownType) {
     val arity: Int = types.size
@@ -22,10 +22,10 @@ class TupleType(
 
         other as TupleType
 
-        return types.contentEquals(other.types)
+        return types == other.types
     }
 
     override fun hashCode(): Int {
-        return types.contentHashCode()
+        return types.hashCode()
     }
 }

@@ -244,7 +244,7 @@ internal class TypeInferrer(
             return null
         }
 
-        return TupleType(contentTypes.filterNotNull().toTypedArray())
+        return TupleType(contentTypes.filterNotNull())
     }
 
     private fun visitDotTuple(ctx: stellaParser.DotTupleContext, expectedType: IType?): IType? {
@@ -284,7 +284,7 @@ internal class TypeInferrer(
             return null
         }
 
-        val result = RecordType(labels.toTypedArray(), types.toTypedArray())
+        val result = RecordType(labels, types)
         return validateTypes(result, expectedType, ctx) as RecordType?
     }
 
