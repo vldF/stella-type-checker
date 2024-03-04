@@ -25,6 +25,7 @@ object StellaTestsRunner {
         StellaExtension.FixpointCombinator,
         StellaExtension.SumTypes,
         StellaExtension.Variants,
+        StellaExtension.Lists,
     )
 
     fun runOkTest(testName: String) {

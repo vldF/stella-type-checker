@@ -12,6 +12,7 @@ object SyntaxTypeProcessor {
             is stellaParser.TypeParensContext -> getType(ctx.type_)
             is stellaParser.TypeSumContext -> visitSumType(ctx)
             is stellaParser.TypeVariantContext -> visitVariantType(ctx)
+            is stellaParser.TypeListContext -> visitListType(ctx)
             else -> UnknownType
         }
     }
@@ -49,5 +50,11 @@ object SyntaxTypeProcessor {
         val types = ctx.fieldTypes.map { getType(it.type_) }
 
         return VariantType(labels, types)
+    }
+
+    private fun visitListType(ctx: stellaParser.TypeListContext): IType {
+        val type = getType(ctx.type_)
+
+        return ListType(type)
     }
 }

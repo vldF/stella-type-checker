@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.ParserRuleContext
 import utils.paramName
 import stellaParser
 import types.*
+import kotlin.math.exp
 
 internal class TypeInferrer(
     private val errorManager: ErrorManager?,
@@ -40,6 +41,11 @@ internal class TypeInferrer(
             is stellaParser.InlContext -> visitInl(ctx, expectedType)
             is stellaParser.InrContext -> visitInr(ctx, expectedType)
             is stellaParser.VariantContext -> visitVariant(ctx, expectedType)
+            is stellaParser.ListContext -> visitListContext(ctx, expectedType)
+            is stellaParser.ConsListContext -> visitConsList(ctx, expectedType)
+            is stellaParser.HeadContext -> visitHead(ctx, expectedType)
+            is stellaParser.TailContext -> visitTail(ctx, expectedType)
+            is stellaParser.IsEmptyContext -> visitIsEmpty(ctx, expectedType)
             else -> {
                 println("unsupported syntax for ${ctx::class.java}")
                 null
@@ -175,12 +181,12 @@ internal class TypeInferrer(
     private fun visitApplication(ctx: stellaParser.ApplicationContext, expectedType: IType?): IType? {
         val func = ctx.`fun`
 
-        val funType = visitExpression(func, null)
+        val funType = visitExpression(func, null) ?: return null
 
         if (funType !is FunctionalType) {
             errorManager?.registerError(
                 StellaErrorType.ERROR_NOT_A_FUNCTION,
-                funType ?: UnknownType,
+                funType,
                 func
             )
             return null
@@ -596,6 +602,7 @@ internal class TypeInferrer(
             is RecordType -> TODO()
             is VariantType -> areVariantPatternsExhaustive(patterns, type)
             is FunctionalType -> false // only var can match with a functional type
+            is ListType -> false       // only var can match with a list type
             UnknownType -> error("wrong type $type")
         }
     }
@@ -638,7 +645,8 @@ internal class TypeInferrer(
             is VariantType -> findWrongVariantPatter(patterns, type)
             is TupleType -> TODO()
             is RecordType -> TODO()
-            is FunctionalType -> findWrongFunctionalPatter(patterns)
+            is FunctionalType -> findNotVarPatter(patterns)
+            is ListType -> findNotVarPatter(patterns)
             UnknownType -> error("wrong type $type")
         }
     }
@@ -674,7 +682,7 @@ internal class TypeInferrer(
         }
     }
 
-    private fun findWrongFunctionalPatter(patterns: List<stellaParser.PatternContext>): stellaParser.PatternContext? {
+    private fun findNotVarPatter(patterns: List<stellaParser.PatternContext>): stellaParser.PatternContext? {
         return patterns.firstOrNull { it !is stellaParser.PatternVarContext }
     }
 
@@ -769,5 +777,152 @@ internal class TypeInferrer(
         visitExpression(expression, expectedExpressionType)
 
         return expectedType
+    }
+
+    private fun visitListContext(ctx: stellaParser.ListContext, expectedType: IType?): ListType? {
+        if (expectedType != null && expectedType !is ListType) {
+            val listType = visitListContext(ctx, null) ?: return null
+            errorManager?.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_LIST,
+                expectedType,
+                listType
+            )
+
+            return null
+        }
+
+
+        val expressions = ctx.exprs
+        if (expectedType == null && expressions.isEmpty()) {
+            errorManager?.registerError(
+                StellaErrorType.ERROR_AMBIGUOUS_LIST,
+                ctx
+            )
+
+            return null
+        }
+
+        val expressionTypes = expressions.map { visitExpression(it, null) }
+        if (expressionTypes.any { it == null }) {
+            return null
+        }
+
+        val listType = (expectedType as ListType?)?.type ?: expressionTypes.firstOrNull { it != null } ?: return null
+        val firstWrongTypedExpressionIndex = expressionTypes.indexOfFirst { it != listType }
+
+        if (firstWrongTypedExpressionIndex != -1) {
+            errorManager?.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
+                listType,
+                expressionTypes[firstWrongTypedExpressionIndex]!!,
+                expressions[firstWrongTypedExpressionIndex]
+            )
+
+            return null
+        }
+
+        return ListType(listType)
+    }
+
+    private fun visitConsList(ctx: stellaParser.ConsListContext, expectedType: IType?): ListType? {
+        if (expectedType != null && expectedType !is ListType) {
+            val listType = visitConsList(ctx, null) ?: return null
+            errorManager?.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_LIST,
+                expectedType,
+                listType
+            )
+
+            return null
+        }
+
+        val head = ctx.head
+        val headType = visitExpression(head, null) ?: return null
+
+        val tail = ctx.tail
+        visitExpression(tail, headType) ?: return null
+
+        return ListType(headType)
+    }
+
+    @Suppress("DuplicatedCode")
+    private fun visitHead(ctx: stellaParser.HeadContext, expectedType: IType?): IType? {
+        val listType = if (expectedType != null) {
+            ListType(expectedType)
+        } else {
+            null
+        }
+
+        val list = ctx.list
+        val expressionType = visitExpression(list, listType) ?: return null
+        if (expressionType !is ListType) {
+            errorManager?.registerError(
+                StellaErrorType.ERROR_NOT_A_LIST,
+                expressionType,
+                list
+            )
+
+            return null
+        }
+
+        val actualType = expressionType.type
+        return validateTypes(actualType, expectedType, ctx)
+    }
+
+    @Suppress("DuplicatedCode")
+    private fun visitTail(ctx: stellaParser.TailContext, expectedType: IType?): IType? {
+        if (expectedType != null && expectedType !is ListType) {
+            val actualType = visitTail(ctx, null) ?: return null
+            errorManager?.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
+                expectedType,
+                actualType,
+                ctx
+            )
+
+            return null
+        }
+
+        val list = ctx.list
+
+        val expressionType = visitExpression(list, expectedType) ?: return null
+        if (expressionType !is ListType) {
+            errorManager?.registerError(
+                StellaErrorType.ERROR_NOT_A_LIST,
+                expressionType,
+                list
+            )
+
+            return null
+        }
+
+        return validateTypes(expressionType, expectedType, ctx)
+    }
+
+    private fun visitIsEmpty(ctx: stellaParser.IsEmptyContext, expectedType: IType?): BoolType? {
+        if (expectedType != null && expectedType !is BoolType) {
+            errorManager?.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
+                expectedType,
+                BoolType,
+                ctx
+            )
+
+            return null
+        }
+
+        val expression = ctx.expr()
+        val expressionType = visitExpression(expression, null) ?: return null
+        if (expressionType !is ListType) {
+            errorManager?.registerError(
+                StellaErrorType.ERROR_NOT_A_LIST,
+                expressionType,
+                expression
+            )
+
+            return null
+        }
+
+        return BoolType
     }
 }
