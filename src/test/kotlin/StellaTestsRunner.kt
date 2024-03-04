@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assumptions
 import types.IType
 import types.UnknownType
+import utils.formatToString
 import java.io.File
 import java.util.*
 
@@ -139,30 +140,6 @@ object StellaTestsRunner {
             prediction: Int,
             configs: ATNConfigSet?,
         ) { }
-    }
-
-    private fun List<StellaError>.formatToString(parser: stellaParser): String {
-        return this.joinToString(separator = "\n") { it.formatToString(parser) }
-    }
-
-    private fun StellaError.formatToString(parser: stellaParser) = buildString {
-        appendLine("An error occurred during typechecking!")
-        appendLine("ERROR: $type")
-
-        val formattedArgs = args.map { arg ->
-            when (arg) {
-                is ParserRuleContext -> {
-                    val start = arg.start
-                    val stop = arg.stop
-
-                    parser.tokenStream.getText(start, stop)
-                }
-                is IType -> arg.name
-                else -> arg
-            }
-        }.map { "\n$it\n" }
-        val asString = ErrorStrings.strings[type]!!.format(*formattedArgs.toTypedArray())
-        appendLine(asString)
     }
 
     private fun getAlternativeErrors(file: File): List<StellaErrorType> {
