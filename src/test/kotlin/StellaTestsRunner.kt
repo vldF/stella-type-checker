@@ -26,6 +26,7 @@ object StellaTestsRunner {
         StellaExtension.SumTypes,
         StellaExtension.Variants,
         StellaExtension.Lists,
+        StellaExtension.Predecessor,
     )
 
     fun runOkTest(testName: String) {

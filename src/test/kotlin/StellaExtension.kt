@@ -9,6 +9,7 @@ enum class StellaExtension(val extensionName: String) {
     Lists("lists"),
     Variants("variants"),
     FixpointCombinator("fixpoint-combinator"),
+    Predecessor("predecessor"),
 
     // additional extensions
     NaturalLiterals("natural-literals"),
