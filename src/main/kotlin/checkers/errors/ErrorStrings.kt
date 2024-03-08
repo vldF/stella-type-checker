@@ -21,7 +21,7 @@ object ErrorStrings {
         StellaErrorType.ERROR_TUPLE_INDEX_OUT_OF_BOUNDS to "tuple index %s is out of bounds %s",
         StellaErrorType.ERROR_UNEXPECTED_TUPLE_LENGTH to "expected %s components for a tuple but got %s in tuple %s",
         StellaErrorType.ERROR_AMBIGUOUS_SUM_TYPE to "can't infer injection type for %s",
-        StellaErrorType.ERROR_AMBIGUOUS_LIST to "can't infer the list %s type",
+        StellaErrorType.ERROR_AMBIGUOUS_LIST_TYPE to "can't infer the list %s type",
         StellaErrorType.ERROR_ILLEGAL_EMPTY_MATCHING to "empty alternatives list for %s",
         StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS to "non-exhaustive patterns for type %s",
         StellaErrorType.ERROR_UNEXPECTED_PATTERN_FOR_TYPE to "unexpected pattern %s for type %s",

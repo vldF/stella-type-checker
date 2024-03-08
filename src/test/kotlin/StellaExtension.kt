@@ -19,7 +19,9 @@ enum class StellaExtension(val extensionName: String) {
     StructuralPatterns("structural-patterns"),
     NullaryVariantLabels("nullary-variant-labels"),
     LetrecBindings("letrec-bindings"),
-    LetrecManyBindings("letrec-many-bindings");
+    LetrecManyBindings("letrec-many-bindings"),
+    LetPatterns("let-patterns"),
+    PatternAscriptions("pattern-ascriptions");
 
     companion object {
         fun fromString(str: String): StellaExtension {
