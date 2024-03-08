@@ -2,6 +2,10 @@ name: Tests
 
 on: [push]
 
+permissions:
+  contents: write
+  packages: write
+
 jobs:
   tests:
     runs-on: ubuntu-latest
@@ -14,3 +18,26 @@ jobs:
         env:
           ENABLE_ONLY_SUPPORTED_TESTS: true
         run:  ./gradlew test
+      - name: Build
+        env:
+          ENABLE_ONLY_SUPPORTED_TESTS: true
+        run: ./gradlew build -x test
+      - name: Get the Version
+        id: get_version
+        if: github.ref == 'refs/heads/release'
+        run: |
+          export VER="v$(cat VERSION)-analyzer"
+          echo "VERSION=$VER" >> $GITHUB_ENV
+          echo "version is $VER"
+      - name: Create the Release
+        id: upload-release-asset
+        uses: softprops/action-gh-release@v1
+        if: github.ref == 'refs/heads/release'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: |
+            ./build/distributions/stella-labs.tar
+            ./build/distributions/stella-labs.zip
+          name: vldf-stella-type-checker
+          tag_name: ${{ env.VERSION }}
