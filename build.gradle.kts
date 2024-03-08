@@ -34,7 +34,7 @@ java {
 
 application {
     // Define the main class for the application.
-    mainClass.set("edu.itmo.ilang.AppKt")
+    mainClass.set("MainKt")
 }
 
 tasks.named<Test>("test") {
