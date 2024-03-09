@@ -16,6 +16,12 @@ class MainFunctionCheckerVisitor(
     override fun visitDeclFun(ctx: stellaParser.DeclFunContext?) {
         if (ctx != null && ctx.functionName == mainFunctionName) {
             isMainDiscovered = true
+            if (ctx.paramDecls.size != 1) {
+                errorManager.registerError(
+                    StellaErrorType.ERROR_INCORRECT_ARITY_OF_MAIN,
+                    ctx.paramDecls.size
+                )
+            }
         }
 
         return super.visitDeclFun(ctx)

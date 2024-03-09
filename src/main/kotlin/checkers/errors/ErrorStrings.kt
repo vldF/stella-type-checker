@@ -27,6 +27,7 @@ object ErrorStrings {
         StellaErrorType.ERROR_UNEXPECTED_PATTERN_FOR_TYPE to "unexpected pattern %s for type %s",
         StellaErrorType.ERROR_UNEXPECTED_VARIANT_LABEL to "unexpected variant label %s in %s of type %s",
         StellaErrorType.ERROR_UNEXPECTED_VARIANT to "expected type %s but got variant variant type",
-        StellaErrorType.ERROR_AMBIGUOUS_VARIANT_TYPE to "can't infer injection type of variant %s"
+        StellaErrorType.ERROR_AMBIGUOUS_VARIANT_TYPE to "can't infer injection type of variant %s",
+        StellaErrorType.ERROR_INCORRECT_ARITY_OF_MAIN to "the main function must have one parameter but got %s"
     )
 }

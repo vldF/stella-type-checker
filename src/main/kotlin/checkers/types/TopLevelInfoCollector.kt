@@ -14,7 +14,8 @@ class TopLevelInfoCollector(
     override fun visitDeclFun(ctx: stellaParser.DeclFunContext) {
         val name = ctx.functionName
 
-        val argType = SyntaxTypeProcessor.getType(ctx.paramDecl.paramType)
+        val paramDecl = ctx.paramDecls?.firstOrNull() ?: return
+        val argType = SyntaxTypeProcessor.getType(paramDecl.paramType)
         val returnType = SyntaxTypeProcessor.getType(ctx.returnType)
         val functionType = FunctionalType(argType, returnType)
 
