@@ -58,6 +58,8 @@ task<Test>("runSupportedTests") {
             "StellaTestRunner.kt"
     group = "verification"
 
+    outputs.upToDateWhen {false}
+
     environment("ENABLE_ONLY_SUPPORTED_TESTS", true)
     useJUnitPlatform()
 
@@ -69,6 +71,8 @@ task<Test>("runSupportedTests") {
 task<Test>("runAllTests") {
     description = "Run all tests for Stella Type Checker. You can run only supported tests via task runSupportedTests"
     group = "verification"
+
+    outputs.upToDateWhen {false}
 
     environment("ENABLE_ONLY_SUPPORTED_TESTS", false)
     useJUnitPlatform()
