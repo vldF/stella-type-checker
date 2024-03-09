@@ -38,8 +38,7 @@ application {
 }
 
 tasks.named<Test>("test") {
-    // Use JUnit Platform for unit tests.
-    useJUnitPlatform()
+    enabled = false
 }
 
 tasks.generateGrammarSource {
@@ -54,7 +53,26 @@ tasks.named("compileTestKotlin") {
     dependsOn(tasks.named("generateTestGrammarSource"))
 }
 
-tasks.test {
+task<Test>("runSupportedTests") {
+    description = "Run only supported Stella Type Checker tests. You can configure supported extension list in " +
+            "StellaTestRunner.kt"
+    group = "verification"
+
+    environment("ENABLE_ONLY_SUPPORTED_TESTS", true)
+    useJUnitPlatform()
+
+    testLogging {
+        events("passed", "skipped", "failed", "standardOut", "standardError")
+    }
+}
+
+task<Test>("runAllTests") {
+    description = "Run all tests for Stella Type Checker. You can run only supported tests via task runSupportedTests"
+    group = "verification"
+
+    environment("ENABLE_ONLY_SUPPORTED_TESTS", false)
+    useJUnitPlatform()
+
     testLogging {
         events("passed", "skipped", "failed", "standardOut", "standardError")
     }

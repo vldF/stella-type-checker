@@ -7,21 +7,27 @@ permissions:
   packages: write
 
 jobs:
-  tests-and-build:
+  supported-tests:
     runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/release'
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
         with:
           submodules: 'true'
       - name: Run test
-        env:
-          ENABLE_ONLY_SUPPORTED_TESTS: true
-        run:  ./gradlew test
-      - name: Build
-        env:
-          ENABLE_ONLY_SUPPORTED_TESTS: true
-        run: ./gradlew build -x test
+        run: ./gradlew runSupportedTests
+
+  build:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/release'
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+        with:
+          submodules: 'true'
+      - name: Build and tests
+        run: ./gradlew build
       - name: Get the Version
         id: get_version
         if: github.ref == 'refs/heads/release'
