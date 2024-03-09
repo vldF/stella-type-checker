@@ -32,6 +32,7 @@ fun main() {
 private fun readCode(): String {
     val code = StringBuilder()
     val scanner = Scanner(System.`in`)
+    scanner.useDelimiter(System.lineSeparator())
     while (scanner.hasNext()) {
         code.appendLine(scanner.next())
     }
