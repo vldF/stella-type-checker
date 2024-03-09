@@ -2,7 +2,7 @@
 
 *Необходима Java версии 20 и выше*
 
-1. Скачать последнюю сборку или собрать её самостоятельно:
+1. [Скачать последнюю сборку](https://github.com/vldF/stella-labs/releases) или собрать её самостоятельно:
    1. Склонить репозиторий и сабмодуль с тестами:
       ```shell
       git clone --recurse-submodules https://github.com/vldF/stella-labs
