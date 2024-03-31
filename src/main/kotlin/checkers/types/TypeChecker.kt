@@ -608,8 +608,11 @@ internal class TypeChecker(
 
         val patterns = cases.map { it.pattern_ }
         val exhaustivenessChecker = ExhaustivenessChecker()
+        if (!exhaustivenessChecker.checkForPatternsTypeMissmatch(patterns, expressionType, errorManager)) {
+            return null
+        }
 
-        val wrongPattern = exhaustivenessChecker.findWrongPatter(patterns, expressionType)
+        val wrongPattern = exhaustivenessChecker.findWrongPattern(patterns, expressionType)
         if (wrongPattern != null) {
             errorManager.registerError(
                 StellaErrorType.ERROR_UNEXPECTED_PATTERN_FOR_TYPE,
@@ -764,7 +767,12 @@ internal class TypeChecker(
 
     private fun visitVariant(ctx: stellaParser.VariantContext, expectedType: IType?): VariantType? {
         if (expectedType == null) {
-            error("can't infer type of variant ${ctx.toStringTree()}")
+            errorManager.registerError(
+                StellaErrorType.ERROR_AMBIGUOUS_VARIANT_TYPE,
+                ctx
+            )
+
+            return null
         }
 
         if (expectedType !is VariantType) {

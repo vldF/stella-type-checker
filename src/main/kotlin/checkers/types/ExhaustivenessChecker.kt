@@ -1,8 +1,81 @@
 package checkers.types
 
+import checkers.errors.ErrorManager
+import checkers.errors.StellaErrorType
+import stellaParser
 import types.*
+import kotlin.reflect.KClass
 
 class ExhaustivenessChecker {
+    fun checkForPatternsTypeMissmatch(
+        patterns: List<stellaParser.PatternContext>,
+        expectedType: IType,
+        errorManager: ErrorManager,
+    ): Boolean {
+        return patterns.all { checkForPatternTypeMissmatch(it, expectedType, errorManager) }
+    }
+
+    private fun checkForPatternTypeMissmatch(
+        pattern: stellaParser.PatternContext,
+        expectedType: IType,
+        errorManager: ErrorManager,
+    ): Boolean {
+        val patternType = when (pattern) {
+            is stellaParser.PatternVariantContext -> VariantType::class
+            is stellaParser.PatternInlContext -> SumType::class
+            is stellaParser.PatternInrContext -> SumType::class
+            is stellaParser.PatternTupleContext -> TupleType::class
+            is stellaParser.PatternRecordContext -> RecordType::class
+            is stellaParser.PatternListContext -> ListType::class
+            is stellaParser.PatternConsContext -> ListType::class
+            is stellaParser.PatternFalseContext -> BoolType::class
+            is stellaParser.PatternTrueContext -> BoolType::class
+            is stellaParser.PatternUnitContext -> UnitType::class
+            is stellaParser.PatternIntContext -> NatType::class
+            is stellaParser.PatternSuccContext -> NatType::class
+            is stellaParser.PatternVarContext -> return true
+            is stellaParser.PatternAscContext -> {
+                val ascType = SyntaxTypeProcessor.getType(pattern.type_)
+                if (ascType != expectedType) {
+                    errorManager.registerError(
+                        StellaErrorType.ERROR_UNEXPECTED_PATTERN_FOR_TYPE,
+                        pattern,
+                        expectedType
+                    )
+
+                    return false
+                }
+
+                return checkForPatternTypeMissmatch(pattern.pattern_, ascType, errorManager)
+            }
+            is stellaParser.ParenthesisedPatternContext -> {
+                return checkForPatternTypeMissmatch(pattern.pattern_, expectedType, errorManager)
+            }
+            else -> error("unsupported pattern")
+        }
+
+        return validatePatternType(expectedType, patternType, pattern, errorManager)
+    }
+
+    private fun validatePatternType(
+        expectedType: IType,
+        actualPatternType: KClass<out IType>,
+        context: stellaParser.PatternContext,
+        errorManager: ErrorManager,
+    ): Boolean {
+        if (actualPatternType == expectedType::class) {
+            return true
+        }
+
+        errorManager.registerError(
+            StellaErrorType.ERROR_UNEXPECTED_PATTERN_FOR_TYPE,
+            expectedType,
+            context
+        )
+
+        return false
+    }
+
     fun arePatternsExhaustive(patterns: List<stellaParser.PatternContext>, type: IType): Boolean {
         return hasAny(patterns) || when (type) {
             BoolType -> areBoolPatternsExhaustive(patterns)
@@ -47,7 +120,7 @@ class ExhaustivenessChecker {
         return patterns.any { it is stellaParser.PatternVarContext }
     }
 
-    fun findWrongPatter(patterns: List<stellaParser.PatternContext>, type: IType): stellaParser.PatternContext? {
+    fun findWrongPattern(patterns: List<stellaParser.PatternContext>, type: IType): stellaParser.PatternContext? {
         return when (type) {
             BoolType -> findWrongBoolPatter(patterns)
             NatType -> findWrongNatPatter(patterns)
