@@ -225,10 +225,23 @@ internal class TypeChecker(
             return null
         }
 
+        val resultType = funType.to
+        if (expectedType != null) {
+            if (resultType != expectedType) {
+                errorManager.registerError(
+                    StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
+                    expectedType,
+                    resultType,
+                    ctx
+                )
+
+                return null
+            }
+        }
+
         val arg = ctx.args.first()
         visitExpression(arg, funType.from) ?: return null
 
-        val resultType = funType.to
         return validateTypes(resultType, expectedType, ctx)
     }
 
@@ -470,67 +483,6 @@ internal class TypeChecker(
     private fun validateTypes(actualType: IType, expectedType: IType?, expression: ParserRuleContext): IType? {
         if (expectedType == null) {
             return actualType
-        }
-
-        if (actualType is FunctionalType && expectedType !is FunctionalType) {
-            errorManager.registerError(
-                StellaErrorType.ERROR_UNEXPECTED_LAMBDA,
-                expectedType,
-                actualType,
-                expression
-            )
-
-            return null
-        }
-
-        if (actualType is TupleType && expectedType !is TupleType) {
-            errorManager.registerError(
-                StellaErrorType.ERROR_UNEXPECTED_TUPLE,
-                expectedType,
-                actualType
-            )
-
-            return null
-        }
-
-        if (actualType is RecordType && expectedType !is RecordType) {
-            errorManager.registerError(
-                StellaErrorType.ERROR_UNEXPECTED_RECORD,
-                expectedType,
-                actualType
-            )
-
-            return null
-        }
-
-        if (actualType !is FunctionalType && expectedType is FunctionalType) {
-            errorManager.registerError(
-                StellaErrorType.ERROR_NOT_A_FUNCTION,
-                actualType,
-                expression
-            )
-
-            return null
-        }
-
-        if (actualType !is TupleType && expectedType is TupleType) {
-            errorManager.registerError(
-                StellaErrorType.ERROR_NOT_A_TUPLE,
-                actualType,
-                expression
-            )
-
-            return null
-        }
-
-        if (actualType !is RecordType && expectedType is RecordType) {
-            errorManager.registerError(
-                StellaErrorType.ERROR_NOT_A_RECORD,
-                actualType,
-                expression
-            )
-
-            return null
         }
 
         if (actualType is TupleType && expectedType is TupleType) {
