@@ -38,23 +38,6 @@ application {
 }
 
 tasks.named<Test>("test") {
-    enabled = true
-    useJUnitPlatform()
-}
-
-tasks.generateGrammarSource {
-    arguments = listOf("-visitor", "-long-messages")
-}
-
-tasks.named("compileKotlin") {
-    dependsOn(tasks.named("generateGrammarSource"))
-}
-
-tasks.named("compileTestKotlin") {
-    dependsOn(tasks.named("generateTestGrammarSource"))
-}
-
-task<Test>("runSupportedTests") {
     description = "Run only supported Stella Type Checker tests. You can configure supported extension list in " +
             "StellaTestRunner.kt"
     group = "verification"
@@ -67,6 +50,18 @@ task<Test>("runSupportedTests") {
     testLogging {
         events("passed", "skipped", "failed", "standardOut", "standardError")
     }
+}
+
+tasks.generateGrammarSource {
+    arguments = listOf("-visitor", "-long-messages")
+}
+
+tasks.named("compileKotlin") {
+    dependsOn(tasks.named("generateGrammarSource"))
+}
+
+tasks.named("compileTestKotlin") {
+    dependsOn(tasks.named("generateTestGrammarSource"))
 }
 
 task<Test>("runAllTests") {

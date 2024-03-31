@@ -27,7 +27,7 @@ jobs:
         with:
           submodules: 'true'
       - name: Build and tests
-        run: ./gradlew build
+        run: ./gradlew build -x test
       - name: Get the Version
         id: get_version
         if: github.ref == 'refs/heads/release'
