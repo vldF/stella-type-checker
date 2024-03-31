@@ -14,7 +14,7 @@ fun main() {
 }
 
 private fun StringBuilder.generateOkTests() {
-    val files = File(okTestsPath).listFiles { file -> file.extension == FILE_EXTENSION } ?: error("no ok tests")
+    val files = File(okTestsPath).listFiles { file -> file.isStellaFile } ?: error("no ok tests")
 
     addTestClass("OK_TESTS") {
         files.forEach(::addOkTestFunction)
@@ -28,7 +28,7 @@ private fun StringBuilder.generateBadTests() {
 
     for (errorDir in errorTypes) {
         val errorType = StellaErrorType.valueOf(errorDir.name)
-        val files = errorDir.listFiles { file -> file.extension == FILE_EXTENSION } ?: continue
+        val files = errorDir.listFiles { file -> file.isStellaFile } ?: continue
 
         addTestClass("${errorType}_TESTS") {
             files.forEach { file -> addBadTestFunction(errorType, file) }
@@ -37,6 +37,9 @@ private fun StringBuilder.generateBadTests() {
         appendLine()
     }
 }
+
+private val File.isStellaFile: Boolean
+    get() = this.extension == FILE_EXTENSION_ST || this.extension == FILE_EXTENSION_STELLA
 
 private fun StringBuilder.addPreamble() {
     val content = """
@@ -64,7 +67,7 @@ private fun StringBuilder.addTestClass(name: String, content: StringBuilder.() -
 private fun StringBuilder.addOkTestFunction(file: File) {
     val content = """
         @Test
-        fun ${file.nameWithoutExtension}_test() {
+        fun `${file.nameWithoutExtension} test`() {
             StellaTestsRunner.runOkTest("${file.nameWithoutExtension}")
         }
     """.trimIndent()
@@ -75,7 +78,7 @@ private fun StringBuilder.addOkTestFunction(file: File) {
 private fun StringBuilder.addBadTestFunction(errorType: StellaErrorType, file: File) {
     val content = """
         @Test
-        fun ${file.nameWithoutExtension}_test() {
+        fun `${file.nameWithoutExtension} test`() {
             StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.$errorType, "${file.nameWithoutExtension}")
         }
     """.trimIndent()

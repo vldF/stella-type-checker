@@ -1,5 +1,4 @@
 import checkers.StellaChecker
-import checkers.errors.ErrorStrings
 import checkers.errors.StellaError
 import checkers.errors.StellaErrorType
 import org.antlr.v4.runtime.*
@@ -7,7 +6,6 @@ import org.antlr.v4.runtime.atn.ATNConfigSet
 import org.antlr.v4.runtime.dfa.DFA
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assumptions
-import types.IType
 import types.UnknownType
 import utils.formatToString
 import java.io.File
@@ -31,7 +29,7 @@ object StellaTestsRunner {
     )
 
     fun runOkTest(testName: String) {
-        val file = File(okTestsPath).resolve(testName + FILE_EXTENSION_WITH_PERIOD)
+        val file = File(okTestsPath).getTestFile(testName)
 
         val (errors, parser) = runAnalysis(file)
 
@@ -42,7 +40,7 @@ object StellaTestsRunner {
     }
 
     fun runBadTest(errorType: StellaErrorType, testName: String) {
-        val file = File(badTestsPath).resolve(errorType.toString()).resolve(testName + FILE_EXTENSION_WITH_PERIOD)
+        val file = File(badTestsPath).resolve(errorType.toString()).getTestFile(testName)
 
         val (errors, parser) = runAnalysis(file)
 
@@ -173,5 +171,16 @@ object StellaTestsRunner {
 
     private fun enableOnlySupportedTests(): Boolean {
         return System.getenv()["ENABLE_ONLY_SUPPORTED_TESTS"]?.toBoolean() == true
+    }
+
+    private fun File.getTestFile(testName: String): File {
+        val fileWithStExtension = this.resolve("$testName.$FILE_EXTENSION_ST")
+        val fileWithStellaExtension = this.resolve("$testName.$FILE_EXTENSION_STELLA")
+
+        if (fileWithStExtension.exists()) {
+            return fileWithStExtension
+        }
+
+        return fileWithStellaExtension
     }
 }

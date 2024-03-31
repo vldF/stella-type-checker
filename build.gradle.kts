@@ -38,7 +38,8 @@ application {
 }
 
 tasks.named<Test>("test") {
-    enabled = false
+    enabled = true
+    useJUnitPlatform()
 }
 
 tasks.generateGrammarSource {
