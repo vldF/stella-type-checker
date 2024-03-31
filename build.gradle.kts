@@ -59,7 +59,7 @@ tasks.named("compileTestKotlin") {
 }
 
 task<Test>("runAllTests") {
-    description = "Run all tests for Stella Type Checker. You can run only supported tests via task runSupportedTests"
+    description = "Run all tests for Stella Type Checker. You can run only supported tests via task :test"
     group = "verification"
 
     outputs.upToDateWhen {false}
