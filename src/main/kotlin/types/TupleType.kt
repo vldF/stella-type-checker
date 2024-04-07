@@ -1,22 +1,13 @@
 package types
 
 class TupleType(
-    val types: List<IType>,
-    isKnownType: Boolean = true
-) : IType(isKnownType) {
+    val types: List<IType>
+) : IType {
     val arity: Int = types.size
 
-    override val name: String = if (isKnownType) {
-        types.joinToString(separator = ", ", prefix = "{", postfix = "}") { it.name}
-    } else {
-        "UnknownTuple"
-    }
+    override val name: String = types.joinToString(separator = ", ", prefix = "{", postfix = "}") { it.name}
 
     override fun equals(other: Any?): Boolean {
-        if (!isKnownType || other is IType && !other.isKnownType) {
-            return true
-        }
-
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 

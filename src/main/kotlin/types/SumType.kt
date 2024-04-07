@@ -3,7 +3,7 @@ package types
 class SumType(
     val left: IType,
     val right: IType
-) : IType() {
+) : IType {
     override val name: String = "(${left.name} + ${right.name})"
 
     override fun equals(other: Any?): Boolean {

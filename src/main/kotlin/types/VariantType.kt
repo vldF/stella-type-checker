@@ -3,7 +3,7 @@ package types
 class VariantType(
     val labels: List<String>,
     val types: List<IType>,
-) : IType() {
+) : IType {
     override val name: String = labels
         .zip(types)
         .joinToString(separator = ", ", prefix = "<|", postfix = "|>") { pair -> "${pair.first} : ${pair.second}" }

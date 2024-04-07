@@ -3,25 +3,16 @@ package types
 class RecordType(
     val labels: List<String>,
     val types: List<IType>,
-    isKnownType: Boolean = true
-) : IType(isKnownType) {
+) : IType {
     init {
         check(labels.size == types.size)
     }
 
-    override val name: String = if (isKnownType) {
-        labels
-            .zip(types)
-            .joinToString(separator = ", ", prefix = "{", postfix = "}") { "${it.first} : ${it.second.name}" }
-    } else {
-        "UnknownRecord"
-    }
+    override val name: String = labels
+        .zip(types)
+        .joinToString(separator = ", ", prefix = "{", postfix = "}") { "${it.first} : ${it.second.name}" }
 
     override fun equals(other: Any?): Boolean {
-        if (!isKnownType || other is IType && !other.isKnownType) {
-            return true
-        }
-
         if (other == null || other !is RecordType) {
             return false
         }

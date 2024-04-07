@@ -13,7 +13,7 @@ object SyntaxTypeProcessor {
             is stellaParser.TypeSumContext -> visitSumType(ctx)
             is stellaParser.TypeVariantContext -> visitVariantType(ctx)
             is stellaParser.TypeListContext -> visitListType(ctx)
-            else -> UnknownType
+            else -> error("unknown type")
         }
     }
 

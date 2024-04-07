@@ -6,7 +6,6 @@ import org.antlr.v4.runtime.atn.ATNConfigSet
 import org.antlr.v4.runtime.dfa.DFA
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assumptions
-import types.UnknownType
 import utils.formatToString
 import java.io.File
 import java.util.*
@@ -55,10 +54,6 @@ object StellaTestsRunner {
         val errorsAsText = errors.formatToString(parser)
 
         println(errorsAsText)
-
-        Assertions.assertFalse(errors.map { it.args }.any { args -> args.any { arg -> arg is UnknownType } }) {
-            "UnknownType is got!"
-        }
 
         if (!expectedErrors.containsAll(actualErrors)) {
             Assertions.fail<Unit> {

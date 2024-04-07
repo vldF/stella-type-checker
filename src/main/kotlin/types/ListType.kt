@@ -2,7 +2,7 @@ package types
 
 class ListType(
     val type: IType
-) : IType() {
+) : IType {
     override val name: String = "List[${type.name}]"
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
