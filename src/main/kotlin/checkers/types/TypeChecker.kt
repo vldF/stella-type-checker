@@ -59,6 +59,7 @@ internal class TypeChecker(
             is stellaParser.HeadContext -> visitHead(ctx, expectedType)
             is stellaParser.TailContext -> visitTail(ctx, expectedType)
             is stellaParser.IsEmptyContext -> visitIsEmpty(ctx, expectedType)
+            is stellaParser.SequenceContext -> visitSequence(ctx, expectedType)
             else -> {
                 println("unsupported syntax for ${ctx::class.java}")
                 null
@@ -913,5 +914,11 @@ internal class TypeChecker(
         }
 
         return BoolType
+    }
+
+    private fun visitSequence(ctx: stellaParser.SequenceContext, expectedType: IType?): IType? {
+        visitExpression(ctx.expr1, UnitType) ?: return null
+
+        return visitExpression(ctx.expr2, expectedType)
     }
 }

@@ -198,6 +198,10 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("let_if")
     }
     @Test
+    fun `sequencing_basic test`() {
+        StellaTestsRunner.runOkTest("sequencing_basic")
+    }
+    @Test
     fun `nested_functions test`() {
         StellaTestsRunner.runOkTest("nested_functions")
     }
@@ -597,6 +601,10 @@ class ERROR_UNEXPECTED_NULLARY_VARIANT_PATTERN_TESTS {
 @Suppress("ClassName")
 class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
     @Test
+    fun `sequencing_wrong_return_type test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "sequencing_wrong_return_type")
+    }
+    @Test
     fun `let_list test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "let_list")
     }
@@ -651,6 +659,10 @@ class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
     @Test
     fun `test-1 test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "test-1")
+    }
+    @Test
+    fun `sequencing_non_unit_type2 test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "sequencing_non_unit_type2")
     }
     @Test
     fun `check_inr test`() {
@@ -727,6 +739,10 @@ class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
     @Test
     fun `fixpoint test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "fixpoint")
+    }
+    @Test
+    fun `sequencing_non_unit_type1 test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "sequencing_non_unit_type1")
     }
     @Test
     fun `different_branches test`() {

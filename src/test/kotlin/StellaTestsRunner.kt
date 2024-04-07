@@ -26,6 +26,8 @@ object StellaTestsRunner {
         StellaExtension.Variants,
         StellaExtension.Lists,
         StellaExtension.Predecessor,
+
+        StellaExtension.Sequencing,
     )
 
     fun runOkTest(testName: String) {

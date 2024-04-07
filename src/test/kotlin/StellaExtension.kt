@@ -11,6 +11,8 @@ enum class StellaExtension(val extensionName: String) {
     FixpointCombinator("fixpoint-combinator"),
     Predecessor("predecessor"),
 
+    Sequencing("sequencing"),
+
     // additional extensions
     NaturalLiterals("natural-literals"),
     NestedFunctionDeclarations("nested-function-declarations"),
