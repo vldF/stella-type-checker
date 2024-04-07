@@ -87,6 +87,7 @@ class ExhaustivenessChecker {
             is VariantType -> areVariantPatternsExhaustive(patterns, type)
             is FunctionalType -> false // only var can match with a functional type
             is ListType -> false       // only var can match with a list type
+            is ReferenceType -> true
         }
     }
 
@@ -130,6 +131,7 @@ class ExhaustivenessChecker {
             is RecordType -> TODO()
             is FunctionalType -> findNotVarPatter(patterns)
             is ListType -> findNotVarPatter(patterns)
+            is ReferenceType -> null
         }
     }
 

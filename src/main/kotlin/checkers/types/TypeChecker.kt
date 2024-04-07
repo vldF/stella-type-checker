@@ -60,6 +60,9 @@ internal class TypeChecker(
             is stellaParser.TailContext -> visitTail(ctx, expectedType)
             is stellaParser.IsEmptyContext -> visitIsEmpty(ctx, expectedType)
             is stellaParser.SequenceContext -> visitSequence(ctx, expectedType)
+            is stellaParser.RefContext -> visitRef(ctx, expectedType)
+            is stellaParser.DerefContext -> visitDeref(ctx, expectedType)
+            is stellaParser.AssignContext -> visitAssign(ctx, expectedType)
             else -> {
                 println("unsupported syntax for ${ctx::class.java}")
                 null
@@ -920,5 +923,79 @@ internal class TypeChecker(
         visitExpression(ctx.expr1, UnitType) ?: return null
 
         return visitExpression(ctx.expr2, expectedType)
+    }
+
+    private fun visitRef(ctx: stellaParser.RefContext, expectedType: IType?): ReferenceType? {
+        if (expectedType != null && expectedType !is ReferenceType) {
+            val ref = visitRef(ctx, null) ?: return null
+            errorManager.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_REFERENCE,
+                ref,
+                expectedType
+            )
+
+            return null
+        }
+
+        val innerExpectedType = if (expectedType != null) {
+            (expectedType as ReferenceType).innerType
+        } else null
+
+        val innerType = visitExpression(ctx.expr_, innerExpectedType) ?: return null
+
+        return ReferenceType(innerType)
+    }
+
+    private fun visitDeref(ctx: stellaParser.DerefContext, expectedType: IType?): IType? {
+        val refType = visitExpression(ctx.expr_, null) ?: return null
+
+        if (refType !is ReferenceType) {
+            errorManager.registerError(
+                StellaErrorType.ERROR_NOT_A_REFERENCE,
+                refType
+            )
+
+            return null
+        }
+
+        return validateTypes(refType.innerType, expectedType, ctx)
+    }
+
+    private fun visitAssign(ctx: stellaParser.AssignContext, expectedType: IType?): UnitType? {
+        if (expectedType != null && expectedType !is UnitType) {
+            errorManager.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
+                UnitType,
+                expectedType,
+                ctx
+            )
+
+            return null
+        }
+
+        val lhsType = visitExpression(ctx.lhs, null) ?: return null
+        if (lhsType !is ReferenceType) {
+            errorManager.registerError(
+                StellaErrorType.ERROR_NOT_A_REFERENCE,
+                lhsType
+            )
+
+            return null
+        }
+
+        val rhsType = visitExpression(ctx.rhs, null) ?: return null
+
+        if (lhsType.innerType != rhsType) {
+            errorManager.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
+                lhsType.innerType,
+                rhsType,
+                ctx
+            )
+
+            return null
+        }
+
+        return UnitType
     }
 }

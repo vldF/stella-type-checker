@@ -46,6 +46,10 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("exhaustive_unit")
     }
     @Test
+    fun `deref_parameter test`() {
+        StellaTestsRunner.runOkTest("deref_parameter")
+    }
+    @Test
     fun `simple_sum test`() {
         StellaTestsRunner.runOkTest("simple_sum")
     }
@@ -86,6 +90,10 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("parenthesis")
     }
     @Test
+    fun `assignment_to_parameter test`() {
+        StellaTestsRunner.runOkTest("assignment_to_parameter")
+    }
+    @Test
     fun `let_bool test`() {
         StellaTestsRunner.runOkTest("let_bool")
     }
@@ -122,6 +130,10 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("let_square")
     }
     @Test
+    fun `deref_deref_ref_ref test`() {
+        StellaTestsRunner.runOkTest("deref_deref_ref_ref")
+    }
+    @Test
     fun `exhaustive_fun test`() {
         StellaTestsRunner.runOkTest("exhaustive_fun")
     }
@@ -152,6 +164,10 @@ class OK_TESTS {
     @Test
     fun `exhaustive_sum test`() {
         StellaTestsRunner.runOkTest("exhaustive_sum")
+    }
+    @Test
+    fun `return_deref_ref test`() {
+        StellaTestsRunner.runOkTest("return_deref_ref")
     }
     @Test
     fun `nested_functions_params_shadowing test`() {
@@ -218,6 +234,10 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("exhaustive_bool")
     }
     @Test
+    fun `assignment_ref_ref test`() {
+        StellaTestsRunner.runOkTest("assignment_ref_ref")
+    }
+    @Test
     fun `record_diff_order test`() {
         StellaTestsRunner.runOkTest("record_diff_order")
     }
@@ -240,6 +260,23 @@ class OK_TESTS {
     @Test
     fun `infer_match test`() {
         StellaTestsRunner.runOkTest("infer_match")
+    }
+    
+}
+
+@Suppress("ClassName")
+class ERROR_UNEXPECTED_REFERENCE_TESTS {
+    @Test
+    fun `return_ref_from_non_reference_function_call_func test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_REFERENCE, "return_ref_from_non_reference_function_call_func")
+    }
+    @Test
+    fun `return_ref_from_non_reference_function test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_REFERENCE, "return_ref_from_non_reference_function")
+    }
+    @Test
+    fun `return_ref_from_non_reference_function_complex test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_REFERENCE, "return_ref_from_non_reference_function_complex")
     }
     
 }
@@ -448,6 +485,15 @@ class ERROR_NOT_A_RECORD_TESTS {
 }
 
 @Suppress("ClassName")
+class ERROR_NOT_A_REFERENCE_TESTS {
+    @Test
+    fun `assignment_to_non_ref_parameter test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NOT_A_REFERENCE, "assignment_to_non_ref_parameter")
+    }
+    
+}
+
+@Suppress("ClassName")
 class ERROR_AMBIGUOUS_LIST_TYPE_TESTS {
     @Test
     fun `let test`() {
@@ -613,6 +659,10 @@ class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "unexpected_iszero")
     }
     @Test
+    fun `assignment_ref_ref_wrong_type test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "assignment_ref_ref_wrong_type")
+    }
+    @Test
     fun `infer_fix test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "infer_fix")
     }
@@ -657,6 +707,10 @@ class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "my-mismatch")
     }
     @Test
+    fun `return_deref_wrong_ref test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "return_deref_wrong_ref")
+    }
+    @Test
     fun `test-1 test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "test-1")
     }
@@ -675,6 +729,10 @@ class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
     @Test
     fun `variant_fields_order test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "variant_fields_order")
+    }
+    @Test
+    fun `unref_bool test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "unref_bool")
     }
     @Test
     fun `record_fields_order test`() {
@@ -735,6 +793,10 @@ class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
     @Test
     fun `succ_true test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "succ_true")
+    }
+    @Test
+    fun `call_with_wrong_ref_type test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "call_with_wrong_ref_type")
     }
     @Test
     fun `fixpoint test`() {
@@ -985,4 +1047,3 @@ class ERROR_INCORRECT_ARITY_OF_MAIN_TESTS {
     }
     
 }
-

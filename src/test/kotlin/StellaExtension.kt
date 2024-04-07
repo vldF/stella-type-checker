@@ -12,6 +12,7 @@ enum class StellaExtension(val extensionName: String) {
     Predecessor("predecessor"),
 
     Sequencing("sequencing"),
+    References("references"),
 
     // additional extensions
     NaturalLiterals("natural-literals"),

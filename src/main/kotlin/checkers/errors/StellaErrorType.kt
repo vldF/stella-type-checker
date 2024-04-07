@@ -27,6 +27,8 @@ enum class StellaErrorType {
     ERROR_UNEXPECTED_VARIANT,
     ERROR_AMBIGUOUS_VARIANT_TYPE,
     ERROR_AMBIGUOUS_LIST_TYPE,
+    ERROR_UNEXPECTED_REFERENCE,
+    ERROR_NOT_A_REFERENCE,
 
     // additional errors for #nullary-functions and #multiparameter-functions
     ERROR_INCORRECT_ARITY_OF_MAIN,

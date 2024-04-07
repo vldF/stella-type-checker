@@ -27,6 +27,7 @@ object StellaTestsRunner {
         StellaExtension.Predecessor,
 
         StellaExtension.Sequencing,
+        StellaExtension.References,
     )
 
     fun runOkTest(testName: String) {
