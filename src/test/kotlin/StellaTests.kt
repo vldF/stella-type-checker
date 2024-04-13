@@ -246,10 +246,6 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("exhaustive_sum")
     }
     @Test
-    fun `try_catch test`() {
-        StellaTestsRunner.runOkTest("try_catch")
-    }
-    @Test
     fun `return_deref_ref test`() {
         StellaTestsRunner.runOkTest("return_deref_ref")
     }

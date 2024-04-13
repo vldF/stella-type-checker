@@ -13,6 +13,15 @@ enum class StellaExtension(val extensionName: String) {
 
     Sequencing("sequencing"),
     References("references"),
+    Exceptions("exceptions"),
+    ExceptionTypeDeclaration("exception-type-declaration"),
+    OpenVariantExceptions("open-variant-exceptions"),
+    TryCastAs("try-cast-as"),
+    TopType("top-type"),
+    BottomType("bottom-type"),
+    StructuralSubtyping("structural-subtyping"),
+    TypeCast("type-cast"),
+    Panic("panic"),
 
     // additional extensions
     NaturalLiterals("natural-literals"),
