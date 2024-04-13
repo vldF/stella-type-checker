@@ -126,6 +126,10 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("record_in_abstraction")
     }
     @Test
+    fun `panic_inside_lambda_as_bot test`() {
+        StellaTestsRunner.runOkTest("panic_inside_lambda_as_bot")
+    }
+    @Test
     fun `subtyping_sum2 test`() {
         StellaTestsRunner.runOkTest("subtyping_sum2")
     }
@@ -246,6 +250,10 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("exhaustive_sum")
     }
     @Test
+    fun `ambiguous_type_as_bottom_from_task test`() {
+        StellaTestsRunner.runOkTest("ambiguous_type_as_bottom_from_task")
+    }
+    @Test
     fun `return_deref_ref test`() {
         StellaTestsRunner.runOkTest("return_deref_ref")
     }
@@ -276,6 +284,10 @@ class OK_TESTS {
     @Test
     fun `exhaustive_list test`() {
         StellaTestsRunner.runOkTest("exhaustive_list")
+    }
+    @Test
+    fun `panic_or_bool_as_parameter test`() {
+        StellaTestsRunner.runOkTest("panic_or_bool_as_parameter")
     }
     @Test
     fun `list_ascription test`() {
@@ -330,10 +342,6 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("nested_functions")
     }
     @Test
-    fun `ambigous_type_as_bottom_from_task test`() {
-        StellaTestsRunner.runOkTest("ambigous_type_as_bottom_from_task")
-    }
-    @Test
     fun `letrec test`() {
         StellaTestsRunner.runOkTest("letrec")
     }
@@ -352,6 +360,10 @@ class OK_TESTS {
     @Test
     fun `assignment_ref_ref test`() {
         StellaTestsRunner.runOkTest("assignment_ref_ref")
+    }
+    @Test
+    fun `panic_in_if test`() {
+        StellaTestsRunner.runOkTest("panic_in_if")
     }
     @Test
     fun `subtyping_variants test`() {
@@ -879,6 +891,19 @@ class ERROR_UNEXPECTED_NULLARY_VARIANT_PATTERN_TESTS {
 }
 
 @Suppress("ClassName")
+class ERROR_AMBIGUOUS_PANIC_TYPE_TESTS {
+    @Test
+    fun `panic_or_function test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_AMBIGUOUS_PANIC_TYPE, "panic_or_function")
+    }
+    @Test
+    fun `panic_inside_lambda test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_AMBIGUOUS_PANIC_TYPE, "panic_inside_lambda")
+    }
+    
+}
+
+@Suppress("ClassName")
 class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
     @Test
     fun `sequencing_wrong_return_type test`() {
@@ -1045,8 +1070,16 @@ class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "call_with_wrong_ref_type")
     }
     @Test
+    fun `panic_in_one_branch_bool_in_another test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "panic_in_one_branch_bool_in_another")
+    }
+    @Test
     fun `fixpoint test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "fixpoint")
+    }
+    @Test
+    fun `return_panic_from_lambda_as_bot test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "return_panic_from_lambda_as_bot")
     }
     @Test
     fun `sequencing_non_unit_type1 test`() {
