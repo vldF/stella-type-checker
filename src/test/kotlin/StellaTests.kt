@@ -302,6 +302,10 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("list_lenght_letrec")
     }
     @Test
+    fun `panic_from_task test`() {
+        StellaTestsRunner.runOkTest("panic_from_task")
+    }
+    @Test
     fun `nullary_variant_pattern test`() {
         StellaTestsRunner.runOkTest("nullary_variant_pattern")
     }
@@ -326,8 +330,16 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("nested_functions")
     }
     @Test
+    fun `ambigous_type_as_bottom_from_task test`() {
+        StellaTestsRunner.runOkTest("ambigous_type_as_bottom_from_task")
+    }
+    @Test
     fun `letrec test`() {
         StellaTestsRunner.runOkTest("letrec")
+    }
+    @Test
+    fun `reference_from_task test`() {
+        StellaTestsRunner.runOkTest("reference_from_task")
     }
     @Test
     fun `exhaustive_nested_tuple test`() {
@@ -348,6 +360,10 @@ class OK_TESTS {
     @Test
     fun `subtyping_record2 test`() {
         StellaTestsRunner.runOkTest("subtyping_record2")
+    }
+    @Test
+    fun `type_cast_from_task test`() {
+        StellaTestsRunner.runOkTest("type_cast_from_task")
     }
     @Test
     fun `subtyping_bool test`() {
@@ -388,6 +404,10 @@ class OK_TESTS {
     @Test
     fun `simple_unit test`() {
         StellaTestsRunner.runOkTest("simple_unit")
+    }
+    @Test
+    fun `expections_from_task test`() {
+        StellaTestsRunner.runOkTest("expections_from_task")
     }
     @Test
     fun `infer_match test`() {

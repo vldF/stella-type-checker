@@ -22,6 +22,7 @@ enum class StellaExtension(val extensionName: String) {
     StructuralSubtyping("structural-subtyping"),
     TypeCast("type-cast"),
     Panic("panic"),
+    AmbiguousTypeAsBottom("ambiguous-type-as-bottom"),
 
     // additional extensions
     NaturalLiterals("natural-literals"),
