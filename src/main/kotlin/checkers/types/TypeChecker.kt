@@ -38,7 +38,12 @@ internal class TypeChecker(
     private fun visitDecl(ctx: stellaParser.DeclContext) {
         when (ctx) {
             is stellaParser.DeclFunContext -> visitDeclFun(ctx)
+            is stellaParser.DeclExceptionTypeContext -> visitDeclExceptionType(ctx)
         }
+    }
+
+    private fun visitDeclExceptionType(ctx: stellaParser.DeclExceptionTypeContext) {
+        context.exceptionType = SyntaxTypeProcessor.getType(ctx.exceptionType)
     }
 
     private fun visitExpression(ctx: stellaParser.ExprContext, expectedType: IType?): IType? {
@@ -78,6 +83,9 @@ internal class TypeChecker(
             is stellaParser.DerefContext -> visitDeref(ctx, expectedType)
             is stellaParser.AssignContext -> visitAssign(ctx, expectedType)
             is stellaParser.PanicContext -> visitPanic(ctx, expectedType)
+            is stellaParser.ThrowContext -> visitThrow(ctx, expectedType)
+            is stellaParser.TryWithContext -> visitTryWith(ctx, expectedType)
+            is stellaParser.TryCatchContext -> visitTryCatch(ctx, expectedType)
             else -> {
                 println("unsupported syntax for ${ctx::class.java}")
                 null
@@ -1029,5 +1037,43 @@ internal class TypeChecker(
         }
 
         return expectedType
+    }
+
+    private fun visitThrow(ctx: stellaParser.ThrowContext, expectedType: IType?): IType? {
+        if (expectedType == null) {
+            errorManager.registerError(
+                StellaErrorType.ERROR_AMBIGUOUS_THROW_TYPE,
+                ctx
+            )
+
+            return null
+        }
+
+        val exceptionType = context.exceptionType
+        if (exceptionType == null) {
+            errorManager.registerError(
+                StellaErrorType.ERROR_EXCEPTION_TYPE_NOT_DECLARED
+            )
+
+            return null
+        }
+
+        visitExpression(ctx.expr_, exceptionType) ?: return null
+
+        return expectedType
+    }
+
+    private fun visitTryWith(ctx: stellaParser.TryWithContext, expectedType: IType?): IType? {
+        val mainType = visitExpression(ctx.tryExpr, expectedType) ?: return null
+        visitExpression(ctx.fallbackExpr, mainType) ?: return null
+
+        return mainType
+    }
+
+    private fun visitTryCatch(ctx: stellaParser.TryCatchContext, expectedType: IType?): IType? {
+        val mainType = visitExpression(ctx.tryExpr, expectedType) ?: return null
+        visitExpression(ctx.fallbackExpr, expectedType) ?: return null
+
+        return mainType
     }
 }

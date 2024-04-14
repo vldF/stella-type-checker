@@ -6,6 +6,9 @@ class TypeContext(
     private val variableTypes = mutableMapOf<String, IType>()
     private val functionTypes = mutableMapOf<String, FunctionalType>()
 
+    var exceptionType: IType? = null
+        get() = field ?: parent?.exceptionType
+
     fun saveVariableType(variableName: String, type: IType) {
         if (variableTypes.containsKey(variableName)) {
             error("already known variable $variableName with type $type")

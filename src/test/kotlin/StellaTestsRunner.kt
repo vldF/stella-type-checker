@@ -29,6 +29,8 @@ object StellaTestsRunner {
         StellaExtension.Sequencing,
         StellaExtension.References,
         StellaExtension.Panic,
+        StellaExtension.Exceptions,
+        StellaExtension.ExceptionTypeDeclaration,
     )
 
     fun runOkTest(testName: String) {

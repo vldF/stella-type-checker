@@ -254,6 +254,10 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("ambiguous_type_as_bottom_from_task")
     }
     @Test
+    fun `try_catch test`() {
+        StellaTestsRunner.runOkTest("try_catch")
+    }
+    @Test
     fun `return_deref_ref test`() {
         StellaTestsRunner.runOkTest("return_deref_ref")
     }
@@ -280,6 +284,10 @@ class OK_TESTS {
     @Test
     fun `simple_pair test`() {
         StellaTestsRunner.runOkTest("simple_pair")
+    }
+    @Test
+    fun `try_catch_unepected_pattern_2 test`() {
+        StellaTestsRunner.runOkTest("try_catch_unepected_pattern_2")
     }
     @Test
     fun `exhaustive_list test`() {
@@ -484,6 +492,19 @@ class ERROR_NOT_A_LIST_TESTS {
     @Test
     fun `tail test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NOT_A_LIST, "tail")
+    }
+    
+}
+
+@Suppress("ClassName")
+class ERROR_AMBIGUOUS_THROW_TYPE_TESTS {
+    @Test
+    fun `throw_or_function test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_AMBIGUOUS_THROW_TYPE, "throw_or_function")
+    }
+    @Test
+    fun `throw_inside_lambda test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_AMBIGUOUS_THROW_TYPE, "throw_inside_lambda")
     }
     
 }
