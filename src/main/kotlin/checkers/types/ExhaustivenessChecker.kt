@@ -88,6 +88,8 @@ class ExhaustivenessChecker {
             is FunctionalType -> false // only var can match with a functional type
             is ListType -> false       // only var can match with a list type
             is ReferenceType -> true
+            is TopType -> TODO()
+            is BotType -> TODO()
         }
     }
 
@@ -132,6 +134,8 @@ class ExhaustivenessChecker {
             is FunctionalType -> findNotVarPatter(patterns)
             is ListType -> findNotVarPatter(patterns)
             is ReferenceType -> null
+            is TopType -> null
+            is BotType -> null
         }
     }
 

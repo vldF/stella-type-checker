@@ -1,5 +1,6 @@
 package checkers.types
 
+import StellaExtension
 import checkers.errors.ErrorManager
 import checkers.errors.StellaErrorType
 import org.antlr.v4.runtime.ParserRuleContext
@@ -10,15 +11,28 @@ import utils.functionName
 
 internal class TypeChecker(
     private val errorManager: ErrorManager,
-    parentContext: TypeContext? = null
+    parentContext: TypeContext? = null,
+    private val extensionManager: ExtensionManager = ExtensionManager()
 ) {
     private val context = TypeContext(parentContext)
 
     fun checkProgram(ctx: stellaParser.ProgramContext) {
+        addExtensions(ctx.extensions)
+
         val topLevelInfoCollector = TopLevelInfoCollector(context)
         topLevelInfoCollector.visitProgram(ctx)
 
         ctx.decls.forEach(::visitDecl)
+    }
+
+    private fun addExtensions(ctxs: List<stellaParser.ExtensionContext>) {
+        val extensions = ctxs
+            .filterIsInstance<stellaParser.AnExtensionContext>()
+            .flatMap { it.extensionNames }
+            .map { it.text.removePrefix("#") }
+            .map { StellaExtension.fromString(it) }
+
+        extensionManager.enableExtensions(extensions)
     }
     
     private fun visitDecl(ctx: stellaParser.DeclContext) {
@@ -63,6 +77,7 @@ internal class TypeChecker(
             is stellaParser.RefContext -> visitRef(ctx, expectedType)
             is stellaParser.DerefContext -> visitDeref(ctx, expectedType)
             is stellaParser.AssignContext -> visitAssign(ctx, expectedType)
+            is stellaParser.PanicContext -> visitPanic(ctx, expectedType)
             else -> {
                 println("unsupported syntax for ${ctx::class.java}")
                 null
@@ -83,11 +98,11 @@ internal class TypeChecker(
         val topLevelInfoCollector = TopLevelInfoCollector(functionContext)
         ctx.children.forEach { c -> topLevelInfoCollector.visit(c) }
 
-        val innerTypeCheckerVisitor = TypeChecker(errorManager, functionContext)
+        val innerTypeCheckerVisitor = TypeChecker(errorManager, functionContext, extensionManager)
         ctx.localDecls.forEach { c -> innerTypeCheckerVisitor.visitDecl(c) }
 
         val returnExpr = ctx.returnExpr
-        val typeInferrer = TypeChecker(errorManager, functionContext)
+        val typeInferrer = TypeChecker(errorManager, functionContext, extensionManager)
 
         typeInferrer.visitExpression(returnExpr, expectedFunctionRetType)
     }
@@ -97,7 +112,7 @@ internal class TypeChecker(
         visitExpression(condition, BoolType) ?: return null
 
         val thenType = visitExpression(ctx.thenExpr, expectedType) ?: return null
-        val elseType = visitExpression(ctx.elseExpr, expectedType) ?: return null
+        val elseType = visitExpression(ctx.elseExpr, thenType) ?: return null
 
         if (elseType != thenType) {
             errorManager.registerError(
@@ -206,10 +221,10 @@ internal class TypeChecker(
 
         val innerContext = TypeContext(context)
         innerContext.saveVariableType(arg.paramName, argType)
-        val innerInferrer = TypeChecker(errorManager, innerContext)
+        val innerInferrer = TypeChecker(errorManager, innerContext, extensionManager)
 
         val returnExpr = ctx.returnExpr
-        val returnType = innerInferrer.visitExpression(returnExpr, null) ?: return null
+        val returnType = innerInferrer.visitExpression(returnExpr, (expectedType as FunctionalType?)?.to) ?: return null
 
         val result = FunctionalType(argType, returnType)
         return validateTypes(result, expectedType, ctx) as FunctionalType?
@@ -461,7 +476,7 @@ internal class TypeChecker(
         val letContext = TypeContext(context)
         letContext.saveVariableType(name, expressionType)
 
-        val letTypeInferrer = TypeChecker(errorManager, letContext)
+        val letTypeInferrer = TypeChecker(errorManager, letContext, extensionManager)
         return letTypeInferrer.visitExpression(ctx.body, expectedType)
     }
 
@@ -593,7 +608,7 @@ internal class TypeChecker(
 
         for (case in cases) {
             val caseContext = TypeContext(context)
-            val caseInferrer = TypeChecker(errorManager, caseContext)
+            val caseInferrer = TypeChecker(errorManager, caseContext, extensionManager)
 
             val pattern = case.pattern_
             val bodyExpr = case.expr_
@@ -698,7 +713,7 @@ internal class TypeChecker(
 
     @Suppress("DuplicatedCode")
     private fun visitInr(ctx: stellaParser.InrContext, expectedType: IType?): IType? {
-        if (expectedType == null) {
+        if (expectedType == null || expectedType is BotType) {
             errorManager.registerError(
                 StellaErrorType.ERROR_AMBIGUOUS_SUM_TYPE,
                 ctx
@@ -997,5 +1012,22 @@ internal class TypeChecker(
         }
 
         return UnitType
+    }
+
+    private fun visitPanic(ctx: stellaParser.PanicContext, expectedType: IType?): IType? {
+        if (expectedType == null) {
+            if (extensionManager.ambiguousTypeAsBottom) {
+                return BotType
+            }
+
+            errorManager.registerError(
+                StellaErrorType.ERROR_AMBIGUOUS_PANIC_TYPE,
+                ctx
+            )
+
+            return null
+        }
+
+        return expectedType
     }
 }

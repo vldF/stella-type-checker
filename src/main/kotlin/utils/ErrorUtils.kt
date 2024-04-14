@@ -6,7 +6,7 @@ import org.antlr.v4.runtime.ParserRuleContext
 import stellaParser
 import types.IType
 
-fun StellaError.formatToString(parser: stellaParser) = buildString {
+fun StellaError.formatToString(parser: stellaParser, isDebug: Boolean = false) = buildString {
     appendLine("An error occurred during typechecking!")
     appendLine("ERROR: $type")
 
@@ -24,8 +24,12 @@ fun StellaError.formatToString(parser: stellaParser) = buildString {
     }.map { "\n$it\n" }
     val asString = ErrorStrings.strings[type]!!.format(*formattedArgs.toTypedArray())
     appendLine(asString)
+
+    if (isDebug) {
+        appendLine(this@formatToString.stackTrace.joinToString("\n"))
+    }
 }
 
-fun List<StellaError>.formatToString(parser: stellaParser): String {
-    return this.joinToString(separator = "\n") { it.formatToString(parser) }
+fun List<StellaError>.formatToString(parser: stellaParser, isDebug: Boolean = false): String {
+    return this.joinToString(separator = "\n") { it.formatToString(parser, isDebug) }
 }

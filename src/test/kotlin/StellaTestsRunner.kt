@@ -28,6 +28,7 @@ object StellaTestsRunner {
 
         StellaExtension.Sequencing,
         StellaExtension.References,
+        StellaExtension.Panic,
     )
 
     fun runOkTest(testName: String) {
@@ -36,7 +37,7 @@ object StellaTestsRunner {
         val (errors, parser) = runAnalysis(file)
 
         Assertions.assertEquals(0, errors.size) {
-            val errorsAsText = errors.formatToString(parser)
+            val errorsAsText = errors.formatToString(parser, isDebug = true)
             "unexpected errors count. Errors: $errorsAsText"
         }
     }
@@ -52,11 +53,10 @@ object StellaTestsRunner {
 
         val expectedErrors = getAlternativeErrors(file).toSet().plus(errorType)
         val actualErrors = errors.map { it.type }.toSet()
-        val errorsAsText = errors.formatToString(parser)
-
-        println(errorsAsText)
 
         if (!expectedErrors.containsAll(actualErrors)) {
+            val errorsAsText = errors.formatToString(parser, isDebug = true)
+
             Assertions.fail<Unit> {
                 "expected error $errorType, but got: \n$errorsAsText"
             }

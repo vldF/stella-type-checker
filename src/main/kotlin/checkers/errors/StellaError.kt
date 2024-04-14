@@ -1,8 +1,9 @@
 package checkers.errors
 
-data class StellaError (
+data class StellaError(
     val type: StellaErrorType,
-    val args: Array<Any>
+    val args: Array<Any>,
+    val stackTrace: List<StackTraceElement>
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
