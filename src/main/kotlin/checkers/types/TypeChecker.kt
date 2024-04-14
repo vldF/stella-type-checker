@@ -80,6 +80,7 @@ internal class TypeChecker(
             is stellaParser.IsEmptyContext -> visitIsEmpty(ctx, expectedType)
             is stellaParser.SequenceContext -> visitSequence(ctx, expectedType)
             is stellaParser.RefContext -> visitRef(ctx, expectedType)
+            is stellaParser.ConstMemoryContext -> visitConstMemory(ctx, expectedType)
             is stellaParser.DerefContext -> visitDeref(ctx, expectedType)
             is stellaParser.AssignContext -> visitAssign(ctx, expectedType)
             is stellaParser.PanicContext -> visitPanic(ctx, expectedType)
@@ -969,8 +970,22 @@ internal class TypeChecker(
         return ReferenceType(innerType)
     }
 
+    private fun visitConstMemory(ctx: stellaParser.ConstMemoryContext, expectedType: IType?): IType? {
+        if (expectedType == null) {
+            errorManager.registerError(
+                StellaErrorType.ERROR_AMBIGUOUS_REFERENCE_TYPE,
+                ctx
+            )
+
+            return null
+        }
+
+        return expectedType
+    }
+
     private fun visitDeref(ctx: stellaParser.DerefContext, expectedType: IType?): IType? {
-        val refType = visitExpression(ctx.expr_, null) ?: return null
+        val expectedRefType = expectedType?.let { ReferenceType(it) }
+        val refType = visitExpression(ctx.expr_, expectedRefType) ?: return null
 
         if (refType !is ReferenceType) {
             errorManager.registerError(

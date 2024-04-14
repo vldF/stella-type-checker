@@ -33,6 +33,7 @@ enum class StellaErrorType {
     ERROR_UNEXPECTED_SUBTYPE,
     ERROR_AMBIGUOUS_PANIC_TYPE,
     ERROR_AMBIGUOUS_THROW_TYPE,
+    ERROR_AMBIGUOUS_REFERENCE_TYPE,
 
     // additional errors for #nullary-functions and #multiparameter-functions
     ERROR_INCORRECT_ARITY_OF_MAIN,

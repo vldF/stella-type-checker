@@ -33,6 +33,7 @@ object ErrorStrings {
         StellaErrorType.ERROR_NOT_A_REFERENCE to "expected reference, but got %s",
         StellaErrorType.ERROR_AMBIGUOUS_PANIC_TYPE to "ambiguous panic type for expression %s",
         StellaErrorType.ERROR_AMBIGUOUS_THROW_TYPE to "cannot infer type for throw %s",
+        StellaErrorType.ERROR_AMBIGUOUS_REFERENCE_TYPE to "cannot infer type of reference %s",
         StellaErrorType.ERROR_EXCEPTION_TYPE_NOT_DECLARED to "exception type is not declared",
     )
 }

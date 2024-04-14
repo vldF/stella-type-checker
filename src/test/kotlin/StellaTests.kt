@@ -18,6 +18,10 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("subtyping_nat")
     }
     @Test
+    fun `memory_write_read_3 test`() {
+        StellaTestsRunner.runOkTest("memory_write_read_3")
+    }
+    @Test
     fun `subtyping_top2 test`() {
         StellaTestsRunner.runOkTest("subtyping_top2")
     }
@@ -36,6 +40,10 @@ class OK_TESTS {
     @Test
     fun `infer_fix test`() {
         StellaTestsRunner.runOkTest("infer_fix")
+    }
+    @Test
+    fun `memory_write_read_2 test`() {
+        StellaTestsRunner.runOkTest("memory_write_read_2")
     }
     @Test
     fun `exhaustive_unit_var test`() {
@@ -76,6 +84,10 @@ class OK_TESTS {
     @Test
     fun `try_cast_as test`() {
         StellaTestsRunner.runOkTest("try_cast_as")
+    }
+    @Test
+    fun `memory_pass_to_func test`() {
+        StellaTestsRunner.runOkTest("memory_pass_to_func")
     }
     @Test
     fun `exhaustive_unit test`() {
@@ -170,6 +182,10 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("let_isempty")
     }
     @Test
+    fun `memory_in_if_2 test`() {
+        StellaTestsRunner.runOkTest("memory_in_if_2")
+    }
+    @Test
     fun `int_literal test`() {
         StellaTestsRunner.runOkTest("int_literal")
     }
@@ -232,6 +248,10 @@ class OK_TESTS {
     @Test
     fun `subtyping_variant2 test`() {
         StellaTestsRunner.runOkTest("subtyping_variant2")
+    }
+    @Test
+    fun `memory_write_read test`() {
+        StellaTestsRunner.runOkTest("memory_write_read")
     }
     @Test
     fun `subtyping_func2 test`() {
@@ -320,6 +340,10 @@ class OK_TESTS {
     @Test
     fun `list_lenght_letrec test`() {
         StellaTestsRunner.runOkTest("list_lenght_letrec")
+    }
+    @Test
+    fun `memory_in_if test`() {
+        StellaTestsRunner.runOkTest("memory_in_if")
     }
     @Test
     fun `panic_from_task test`() {
@@ -1147,6 +1171,10 @@ class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "cons_head")
     }
     @Test
+    fun `deref_memory test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "deref_memory")
+    }
+    @Test
     fun `function_return test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "function_return")
     }
@@ -1312,6 +1340,15 @@ class ERROR_MISSING_DATA_FOR_LABEL_TESTS {
     @Test
     fun `simple test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_MISSING_DATA_FOR_LABEL, "simple")
+    }
+    
+}
+
+@Suppress("ClassName")
+class ERROR_AMBIGUOUS_REFERENCE_TYPE_TESTS {
+    @Test
+    fun `deref_memory_from_lambda test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_AMBIGUOUS_REFERENCE_TYPE, "deref_memory_from_lambda")
     }
     
 }
