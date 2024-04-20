@@ -763,52 +763,52 @@ internal class TypeChecker(
 
     @Suppress("DuplicatedCode")
     private fun visitInl(ctx: stellaParser.InlContext, expectedType: IType?): IType? {
-        if (expectedType == null) {
+        return if (expectedType == null && !extensionManager.structuralSubtyping) {
             errorManager.registerError(
                 StellaErrorType.ERROR_AMBIGUOUS_SUM_TYPE,
                 ctx
             )
 
-            return null
-        }
-
-        if (expectedType !is SumType) {
+            null
+        } else if (expectedType != null && expectedType !is SumType && expectedType !is BotType) {
             errorManager.registerError(
                 StellaErrorType.ERROR_UNEXPECTED_INJECTION,
                 expectedType
             )
 
-            return null
+            null
+        } else if (expectedType != null && expectedType is SumType) {
+            visitExpression(ctx.expr_, expectedType.left) ?: return null
+
+            expectedType
+        } else {
+            BotType
         }
-
-        visitExpression(ctx.expr_, expectedType.left) ?: return null
-
-        return expectedType
     }
 
     @Suppress("DuplicatedCode")
     private fun visitInr(ctx: stellaParser.InrContext, expectedType: IType?): IType? {
-        if (expectedType == null || expectedType is BotType) {
+        return if (expectedType == null && !extensionManager.structuralSubtyping) {
             errorManager.registerError(
                 StellaErrorType.ERROR_AMBIGUOUS_SUM_TYPE,
                 ctx
             )
 
-            return null
-        }
-
-        if (expectedType !is SumType) {
+            null
+        } else if (expectedType != null && expectedType !is SumType && expectedType !is BotType) {
             errorManager.registerError(
                 StellaErrorType.ERROR_UNEXPECTED_INJECTION,
                 expectedType
             )
 
-            return null
+            null
+        } else if (expectedType != null && expectedType is SumType) {
+            visitExpression(ctx.expr_, expectedType.right) ?: return null
+
+            expectedType
+        } else {
+            BotType
         }
-
-        visitExpression(ctx.expr_, expectedType.right) ?: return null
-
-        return expectedType
     }
 
     private fun visitVariant(ctx: stellaParser.VariantContext, expectedType: IType?): VariantType? {
