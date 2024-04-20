@@ -30,7 +30,7 @@ internal class TypeChecker(
             .filterIsInstance<stellaParser.AnExtensionContext>()
             .flatMap { it.extensionNames }
             .map { it.text.removePrefix("#") }
-            .map { StellaExtension.fromString(it) }
+            .mapNotNull { StellaExtension.fromString(it) }
 
         extensionManager.enableExtensions(extensions)
     }

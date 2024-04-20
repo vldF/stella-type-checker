@@ -37,8 +37,8 @@ enum class StellaExtension(val extensionName: String) {
     PatternAscriptions("pattern-ascriptions");
 
     companion object {
-        fun fromString(str: String): StellaExtension {
-            return entries.firstOrNull { it.extensionName == str } ?: error("can't find extension $str")
+        fun fromString(str: String): StellaExtension? {
+            return entries.firstOrNull { it.extensionName == str }
         }
     }
 }

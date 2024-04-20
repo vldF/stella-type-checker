@@ -171,7 +171,7 @@ object StellaTestsRunner {
             .filterIsInstance<stellaParser.AnExtensionContext>()
             .flatMap { it.extensionNames }
             .map { it.text.removePrefix("#") }
-            .map { StellaExtension.fromString(it) }
+            .map { StellaExtension.fromString(it) ?: error("can't find extension $it") }
     }
 
     private fun enableOnlySupportedTests(): Boolean {
