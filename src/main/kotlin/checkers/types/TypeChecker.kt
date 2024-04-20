@@ -1148,16 +1148,49 @@ internal class TypeChecker(
         return expectedType
     }
 
+    @Suppress("DuplicatedCode")
     private fun visitTryWith(ctx: stellaParser.TryWithContext, expectedType: IType?): IType? {
+        val exceptionType = context.exceptionType
+        if (exceptionType == null) {
+            errorManager.registerError(
+                StellaErrorType.ERROR_EXCEPTION_TYPE_NOT_DECLARED
+            )
+
+            return null
+        }
+
         val mainType = visitExpression(ctx.tryExpr, expectedType) ?: return null
         visitExpression(ctx.fallbackExpr, mainType) ?: return null
 
         return mainType
     }
 
+    @Suppress("DuplicatedCode")
     private fun visitTryCatch(ctx: stellaParser.TryCatchContext, expectedType: IType?): IType? {
+        val exceptionType = context.exceptionType
+        if (exceptionType == null) {
+            errorManager.registerError(
+                StellaErrorType.ERROR_EXCEPTION_TYPE_NOT_DECLARED
+            )
+
+            return null
+        }
+
         val mainType = visitExpression(ctx.tryExpr, expectedType) ?: return null
-        visitExpression(ctx.fallbackExpr, expectedType) ?: return null
+
+        val patternInCatch = ctx.pat
+        if (patternInCatch !is stellaParser.PatternVarContext) {
+            // only variables are supported here
+            return expectedType
+        }
+
+        val varName = patternInCatch.name.text
+
+        val newContext = TypeContext(context)
+        newContext.saveVariableType(varName, exceptionType)
+        val newTypeChecker = TypeChecker(errorManager, newContext, extensionManager)
+
+        newTypeChecker.visitExpression(ctx.fallbackExpr, expectedType) ?: return null
 
         return mainType
     }
