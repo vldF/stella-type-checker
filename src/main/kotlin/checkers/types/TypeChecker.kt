@@ -287,16 +287,7 @@ internal class TypeChecker(
             return null
         }
 
-        if (expectedType != null && type.isNotSubtypeOf(expectedType, extensionManager.structuralSubtyping)) {
-            errorManager.registerError(
-                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
-                expectedType,
-                type,
-                ctx
-            )
-        }
-
-        return type
+        return validateTypes(type, expectedType, ctx)
     }
 
     private fun visitTuple(ctx: stellaParser.TupleContext, expectedType: IType?): TupleType? {
@@ -815,7 +806,24 @@ internal class TypeChecker(
     }
 
     private fun visitVariant(ctx: stellaParser.VariantContext, expectedType: IType?): VariantType? {
-        if (expectedType == null && !extensionManager.ambiguousTypeAsBottom) {
+        if (expectedType != null && expectedType !is VariantType) {
+            errorManager.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_VARIANT,
+                expectedType
+            )
+
+            return null
+        } else if (expectedType == null && extensionManager.structuralSubtyping) {
+            val label = ctx.label.text
+            val expression = ctx.rhs
+            val expressionType = visitExpression(expression, null) ?: return null
+
+            return VariantType(listOf(label), listOf(expressionType))
+        }
+
+        expectedType as VariantType?
+
+        if (expectedType == null) {
             errorManager.registerError(
                 StellaErrorType.ERROR_AMBIGUOUS_VARIANT_TYPE,
                 ctx
@@ -824,36 +832,25 @@ internal class TypeChecker(
             return null
         }
 
-        val expectedTypeOrBot = expectedType ?: BotType
-
-        if (expectedTypeOrBot !is VariantType) {
-            errorManager.registerError(
-                StellaErrorType.ERROR_UNEXPECTED_VARIANT,
-                expectedTypeOrBot
-            )
-
-            return null
-        }
-
         val label = ctx.label.text
-        val labelIndex = expectedTypeOrBot.labels.indexOf(label)
+        val labelIndex = expectedType.labels.indexOf(label)
         if (labelIndex == -1) {
             errorManager.registerError(
                 StellaErrorType.ERROR_UNEXPECTED_VARIANT_LABEL,
                 label,
                 ctx,
-                expectedTypeOrBot
+                expectedType
             )
 
             return null
         }
 
-        val expectedExpressionType = expectedTypeOrBot.types[labelIndex]
+        val expectedExpressionType = expectedType.types[labelIndex]
 
         val expression = ctx.rhs
         visitExpression(expression, expectedExpressionType)
 
-        return expectedTypeOrBot
+        return expectedType
     }
 
     private fun visitListContext(ctx: stellaParser.ListContext, expectedType: IType?): ListType? {
@@ -1013,7 +1010,7 @@ internal class TypeChecker(
         return visitExpression(ctx.expr2, expectedType)
     }
 
-    private fun visitRef(ctx: stellaParser.RefContext, expectedType: IType?): ReferenceType? {
+    private fun visitRef(ctx: stellaParser.RefContext, expectedType: IType?): IType? {
         if (expectedType != null && expectedType !is ReferenceType && expectedType !is TopType) {
             val ref = visitRef(ctx, null) ?: return null
             errorManager.registerError(
@@ -1031,7 +1028,7 @@ internal class TypeChecker(
 
         val innerType = visitExpression(ctx.expr_, innerExpectedType) ?: return null
 
-        return ReferenceType(innerType)
+        return validateTypes(ReferenceType(innerType), expectedType, ctx)
     }
 
     private fun visitConstMemory(ctx: stellaParser.ConstMemoryContext, expectedType: IType?): IType? {

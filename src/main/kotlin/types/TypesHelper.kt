@@ -15,6 +15,7 @@ fun IType.isSubtypeOf(other: IType, subtypingEnabled: Boolean): Boolean {
 
         this is ReferenceType && other is ReferenceType -> {
             this.innerType.isSubtypeOf(other.innerType, subtypingEnabled)
+                    && other.innerType.isSubtypeOf(this.innerType, subtypingEnabled)
         }
 
         this is RecordType && other is RecordType -> {
