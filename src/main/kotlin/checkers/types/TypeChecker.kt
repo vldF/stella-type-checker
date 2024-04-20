@@ -783,7 +783,8 @@ internal class TypeChecker(
 
             expectedType
         } else {
-            BotType
+            val leftType = visitExpression(ctx.expr_, null) ?: return null
+            SumType(leftType, BotType)
         }
     }
 
@@ -808,12 +809,13 @@ internal class TypeChecker(
 
             expectedType
         } else {
-            BotType
+            val rightType = visitExpression(ctx.expr_, null) ?: return null
+            SumType(BotType, rightType)
         }
     }
 
     private fun visitVariant(ctx: stellaParser.VariantContext, expectedType: IType?): VariantType? {
-        if (expectedType == null) {
+        if (expectedType == null && !extensionManager.ambiguousTypeAsBottom) {
             errorManager.registerError(
                 StellaErrorType.ERROR_AMBIGUOUS_VARIANT_TYPE,
                 ctx
@@ -822,34 +824,36 @@ internal class TypeChecker(
             return null
         }
 
-        if (expectedType !is VariantType) {
+        val expectedTypeOrBot = expectedType ?: BotType
+
+        if (expectedTypeOrBot !is VariantType) {
             errorManager.registerError(
                 StellaErrorType.ERROR_UNEXPECTED_VARIANT,
-                expectedType
+                expectedTypeOrBot
             )
 
             return null
         }
 
         val label = ctx.label.text
-        val labelIndex = expectedType.labels.indexOf(label)
+        val labelIndex = expectedTypeOrBot.labels.indexOf(label)
         if (labelIndex == -1) {
             errorManager.registerError(
                 StellaErrorType.ERROR_UNEXPECTED_VARIANT_LABEL,
                 label,
                 ctx,
-                expectedType
+                expectedTypeOrBot
             )
 
             return null
         }
 
-        val expectedExpressionType = expectedType.types[labelIndex]
+        val expectedExpressionType = expectedTypeOrBot.types[labelIndex]
 
         val expression = ctx.rhs
         visitExpression(expression, expectedExpressionType)
 
-        return expectedType
+        return expectedTypeOrBot
     }
 
     private fun visitListContext(ctx: stellaParser.ListContext, expectedType: IType?): ListType? {
@@ -865,7 +869,7 @@ internal class TypeChecker(
         }
 
         val expressions = ctx.exprs
-        if (expectedType == null && expressions.isEmpty()) {
+        if (expectedType == null && expressions.isEmpty() && !extensionManager.ambiguousTypeAsBottom) {
             errorManager.registerError(
                 StellaErrorType.ERROR_AMBIGUOUS_LIST_TYPE,
                 ctx
@@ -879,7 +883,7 @@ internal class TypeChecker(
             return null
         }
 
-        val listType = (expectedType as ListType?)?.type ?: expressionTypes.firstOrNull { it != null } ?: return null
+        val listType = (expectedType as ListType?)?.type ?: expressionTypes.firstOrNull { it != null } ?: BotType
         val firstWrongTypedExpressionIndex = expressionTypes.indexOfFirst { it != listType }
 
         if (firstWrongTypedExpressionIndex != -1) {
@@ -1031,7 +1035,7 @@ internal class TypeChecker(
     }
 
     private fun visitConstMemory(ctx: stellaParser.ConstMemoryContext, expectedType: IType?): IType? {
-        if (expectedType == null) {
+        if (expectedType == null && !extensionManager.ambiguousTypeAsBottom) {
             errorManager.registerError(
                 StellaErrorType.ERROR_AMBIGUOUS_REFERENCE_TYPE,
                 ctx
@@ -1040,17 +1044,19 @@ internal class TypeChecker(
             return null
         }
 
-        if (expectedType !is ReferenceType) {
+        val expectedTypeOrBot = expectedType ?: BotType
+
+        if (expectedTypeOrBot !is ReferenceType && expectedTypeOrBot !is TopType) {
             errorManager.registerError(
                 StellaErrorType.ERROR_UNEXPECTED_MEMORY_ADDRESS,
                 ctx,
-                expectedType
+                expectedTypeOrBot
             )
 
             return null
         }
 
-        return expectedType
+        return expectedTypeOrBot
     }
 
     private fun visitDeref(ctx: stellaParser.DerefContext, expectedType: IType?): IType? {
@@ -1125,7 +1131,7 @@ internal class TypeChecker(
     }
 
     private fun visitThrow(ctx: stellaParser.ThrowContext, expectedType: IType?): IType? {
-        if (expectedType == null) {
+        if (expectedType == null && !extensionManager.ambiguousTypeAsBottom) {
             errorManager.registerError(
                 StellaErrorType.ERROR_AMBIGUOUS_THROW_TYPE,
                 ctx
@@ -1145,7 +1151,7 @@ internal class TypeChecker(
 
         visitExpression(ctx.expr_, exceptionType) ?: return null
 
-        return expectedType
+        return expectedType ?: BotType
     }
 
     @Suppress("DuplicatedCode")

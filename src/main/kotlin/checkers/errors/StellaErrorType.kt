@@ -37,6 +37,8 @@ enum class StellaErrorType {
     ERROR_AMBIGUOUS_THROW_TYPE,
     ERROR_AMBIGUOUS_REFERENCE_TYPE,
     ERROR_UNEXPECTED_MEMORY_ADDRESS,
+    ERROR_MISSING_TYPE_FOR_LABEL,
+    ERROR_UNEXPECTED_TYPE_FOR_NULLARY_LABEL,
 
     // additional errors for #nullary-functions and #multiparameter-functions
     ERROR_INCORRECT_ARITY_OF_MAIN,

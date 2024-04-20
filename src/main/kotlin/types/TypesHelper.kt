@@ -41,6 +41,11 @@ fun IType.isSubtypeOf(other: IType, subtypingEnabled: Boolean): Boolean {
             this.type.isSubtypeOf(other.type, subtypingEnabled)
         }
 
+        this is SumType && other is SumType -> {
+            this.left.isSubtypeOf(other.left, subtypingEnabled)
+                    && this.right.isSubtypeOf(other.right, subtypingEnabled)
+        }
+
         else -> false
     }
 }
