@@ -29,11 +29,13 @@ object ErrorStrings {
         StellaErrorType.ERROR_UNEXPECTED_VARIANT to "expected type %s but got variant variant type",
         StellaErrorType.ERROR_AMBIGUOUS_VARIANT_TYPE to "can't infer injection type of variant %s",
         StellaErrorType.ERROR_INCORRECT_ARITY_OF_MAIN to "the main function must have one parameter but got %s",
-        StellaErrorType.ERROR_UNEXPECTED_REFERENCE to "got reference %s, but got %s",
+        StellaErrorType.ERROR_UNEXPECTED_REFERENCE to "got reference %s, but expected type %s",
         StellaErrorType.ERROR_NOT_A_REFERENCE to "expected reference, but got %s",
         StellaErrorType.ERROR_AMBIGUOUS_PANIC_TYPE to "ambiguous panic type for expression %s",
         StellaErrorType.ERROR_AMBIGUOUS_THROW_TYPE to "cannot infer type for throw %s",
         StellaErrorType.ERROR_AMBIGUOUS_REFERENCE_TYPE to "cannot infer type of reference %s",
+        StellaErrorType.ERROR_UNEXPECTED_MEMORY_ADDRESS to "unexpected memory address while %s is expected",
         StellaErrorType.ERROR_EXCEPTION_TYPE_NOT_DECLARED to "exception type is not declared",
+        StellaErrorType.ERROR_UNEXPECTED_SUBTYPE to "expected subtype of %s but got type %s in %s",
     )
 }

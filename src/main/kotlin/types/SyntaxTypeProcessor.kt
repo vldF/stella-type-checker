@@ -6,6 +6,8 @@ object SyntaxTypeProcessor {
             is stellaParser.TypeBoolContext -> BoolType
             is stellaParser.TypeUnitContext -> UnitType
             is stellaParser.TypeNatContext -> NatType
+            is stellaParser.TypeTopContext -> TopType
+            is stellaParser.TypeBottomContext -> BotType
             is stellaParser.TypeTupleContext -> visitTypeTuple(ctx)
             is stellaParser.TypeRecordContext -> visitTypeRecord(ctx)
             is stellaParser.TypeFunContext -> visitTypeFun(ctx)

@@ -31,6 +31,10 @@ object StellaTestsRunner {
         StellaExtension.Panic,
         StellaExtension.Exceptions,
         StellaExtension.ExceptionTypeDeclaration,
+        StellaExtension.StructuralSubtyping,
+        StellaExtension.TopType,
+        StellaExtension.BottomType,
+//        StellaExtension.AmbiguousTypeAsBottom,
     )
 
     fun runOkTest(testName: String) {

@@ -6,7 +6,7 @@ class VariantType(
 ) : IType {
     override val name: String = labels
         .zip(types)
-        .joinToString(separator = ", ", prefix = "<|", postfix = "|>") { pair -> "${pair.first} : ${pair.second}" }
+        .joinToString(separator = ", ", prefix = "<|", postfix = "|>") { pair -> "${pair.first} : ${pair.second.name}" }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

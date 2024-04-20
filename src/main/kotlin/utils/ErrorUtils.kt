@@ -30,6 +30,6 @@ fun StellaError.formatToString(parser: stellaParser, isDebug: Boolean = false) =
     }
 }
 
-fun List<StellaError>.formatToString(parser: stellaParser, isDebug: Boolean = false): String {
+fun Collection<StellaError>.formatToString(parser: stellaParser, isDebug: Boolean = false): String {
     return this.joinToString(separator = "\n") { it.formatToString(parser, isDebug) }
 }

@@ -8,6 +8,9 @@ class ExtensionManager {
     val ambiguousTypeAsBottom: Boolean
         get() = StellaExtension.AmbiguousTypeAsBottom in enabledExtensions
 
+    val structuralSubtyping: Boolean
+        get() = StellaExtension.StructuralSubtyping in enabledExtensions
+
     fun enableExtensions(extensions: List<StellaExtension>) {
         enabledExtensions.addAll(extensions)
     }

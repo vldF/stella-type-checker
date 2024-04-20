@@ -254,18 +254,18 @@ internal class TypeChecker(
         }
 
         val resultType = funType.to
-        if (expectedType != null) {
-            if (resultType != expectedType) {
-                errorManager.registerError(
-                    StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
-                    expectedType,
-                    resultType,
-                    ctx
-                )
-
-                return null
-            }
-        }
+//        if (expectedType != null) {
+//            if (resultType.isNotSubtypeOf(expectedType)) {
+//                errorManager.registerError(
+//                    StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
+//                    expectedType,
+//                    resultType,
+//                    ctx
+//                )
+//
+//                return null
+//            }
+//        }
 
         val arg = ctx.args.first()
         visitExpression(arg, funType.from) ?: return null
@@ -286,7 +286,7 @@ internal class TypeChecker(
             return null
         }
 
-        if (expectedType != null && type != expectedType) {
+        if (expectedType != null && type.isNotSubtypeOf(expectedType, extensionManager.structuralSubtyping)) {
             errorManager.registerError(
                 StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
                 expectedType,
@@ -347,7 +347,7 @@ internal class TypeChecker(
     }
 
     @Suppress("DuplicatedCode")
-    private fun visitRecord(ctx: stellaParser.RecordContext, expectedType: IType?): RecordType? {
+    private fun visitRecord(ctx: stellaParser.RecordContext, expectedType: IType?): IType? {
         if (expectedType != null && expectedType !is RecordType) {
             val actualType = visitRecord(ctx, null) ?: return null
 
@@ -369,80 +369,18 @@ internal class TypeChecker(
         if (labels.size != types.size) {
             return null
         }
-        if (expectedType != null) {
-            if (!canRecordDefMatchExpectedType(expectedType, labels, types, ctx)) {
-                return null
-            }
 
+        if (expectedType == null) {
+            return RecordType(labels, types)
+        }
+
+        if (expectedType.labels.zip(expectedType.types).toSet() == labels.zip(types).toSet()) {
             return expectedType
         }
 
-        return RecordType(labels, types)
-    }
+        val actualType = RecordType(labels, types)
 
-    private fun canRecordDefMatchExpectedType(
-        expectedRecord: RecordType,
-        actualLabels: List<String>,
-        actualTypes: List<IType>,
-        ctx: stellaParser.RecordContext
-    ): Boolean {
-        val missingFields = expectedRecord.labels.toSet() - actualLabels.toSet()
-        val extraFields = actualLabels.toSet() - expectedRecord.labels.toSet()
-
-        if (extraFields.isNotEmpty()) {
-            errorManager.registerError(
-                StellaErrorType.ERROR_UNEXPECTED_RECORD_FIELDS,
-                extraFields.first(),
-                expectedRecord
-            )
-
-            return false
-        }
-
-        if (missingFields.isNotEmpty()) {
-            errorManager.registerError(
-                StellaErrorType.ERROR_MISSING_RECORD_FIELDS,
-                missingFields.first(),
-                expectedRecord
-            )
-
-            return false
-        }
-
-        for ((label, type) in actualLabels.zip(actualTypes)) {
-            val expectedTypeForLabelIdx = expectedRecord.labels.indexOf(label)
-            val expectedTypeForLabel = expectedRecord.types[expectedTypeForLabelIdx]
-
-            if (type is RecordType) {
-                if (expectedTypeForLabel !is RecordType) {
-                    errorManager.registerError(
-                        StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
-                        expectedTypeForLabel,
-                        type,
-                        ctx
-                    )
-                    return false
-                }
-
-                if (!canRecordDefMatchExpectedType(expectedTypeForLabel, type.labels, type.types, ctx)) {
-                    return false
-                }
-            } else {
-                if (type != expectedTypeForLabel) {
-                    if (expectedTypeForLabel !is RecordType) {
-                        errorManager.registerError(
-                            StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
-                            expectedTypeForLabel,
-                            type,
-                            ctx
-                        )
-                        return false
-                    }
-                }
-            }
-        }
-
-        return true
+        return validateTypes(actualType, expectedType, ctx)
     }
 
     private fun visitDotRecord(ctx: stellaParser.DotRecordContext, expectedType: IType?): IType? {
@@ -513,29 +451,157 @@ internal class TypeChecker(
             return actualType
         }
 
-        if (actualType is TupleType && expectedType is TupleType) {
-            if (actualType.arity != expectedType.arity) {
-                errorManager.registerError(
-                    StellaErrorType.ERROR_UNEXPECTED_TUPLE_LENGTH,
-                    expectedType.arity,
-                    actualType.arity,
-                    expression
-                )
+        if (actualType.isSubtypeOf(expectedType, extensionManager.structuralSubtyping)) {
+            return expectedType
+        }
+
+        when {
+            actualType is RecordType && expectedType is RecordType -> {
+                val result = validateRecords(expectedType, actualType, expression)
+
+                if (result) {
+                    return expectedType
+                }
+
+                return null
+            }
+
+            actualType is TupleType && expectedType is TupleType -> {
+                if (actualType.arity != expectedType.arity) {
+                    errorManager.registerError(
+                        StellaErrorType.ERROR_UNEXPECTED_TUPLE_LENGTH,
+                        expectedType.arity,
+                        actualType.arity,
+                        expression
+                    )
+
+                    return null
+                }
+            }
+
+            actualType is VariantType && expectedType is VariantType -> {
+                val expectedLabels = expectedType.labels
+                val actualLabels = actualType.labels
+
+                if (!expectedLabels.containsAll(actualLabels)) {
+                    errorManager.registerError(
+                        StellaErrorType.ERROR_UNEXPECTED_VARIANT_LABEL,
+                        (expectedLabels - actualLabels.toSet()).first(),
+                        expression,
+                        actualType
+                    )
+
+                    return null
+                }
             }
         }
 
-        if (actualType != expectedType) {
+        if (extensionManager.structuralSubtyping) {
+            errorManager.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_SUBTYPE,
+                expectedType,
+                actualType,
+                expression
+            )
+        } else {
             errorManager.registerError(
                 StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
                 expectedType,
                 actualType,
                 expression
             )
-
-            return null
         }
 
-        return actualType
+        return null
+    }
+
+    private fun validateRecords(
+        expectedRecord: RecordType,
+        actualRecord: RecordType,
+        ctx: ParserRuleContext
+    ): Boolean {
+        if (expectedRecord != actualRecord && !extensionManager.structuralSubtyping) {
+            errorManager.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
+                expectedRecord,
+                actualRecord,
+                ctx
+            )
+
+            return false
+        }
+
+        val missingFields = expectedRecord.labels.zip(expectedRecord.types) -
+                actualRecord.labels.zip(actualRecord.types).toSet()
+
+        val extraFields = actualRecord.labels.zip(actualRecord.types).toSet() -
+                expectedRecord.labels.zip(expectedRecord.types).toSet()
+
+        if (missingFields.isNotEmpty()) {
+            if (extensionManager.structuralSubtyping && missingFields.map { it.first }.all { it in actualRecord.labels }) {
+                errorManager.registerError(
+                    StellaErrorType.ERROR_UNEXPECTED_SUBTYPE,
+                    expectedRecord,
+                    actualRecord,
+                    ctx
+                )
+
+                return false
+            }
+
+            errorManager.registerError(
+                StellaErrorType.ERROR_MISSING_RECORD_FIELDS,
+                missingFields.first().first,
+                expectedRecord
+            )
+
+            return false
+        }
+
+        if (extraFields.isNotEmpty() && !extensionManager.structuralSubtyping) {
+            errorManager.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_RECORD_FIELDS,
+                extraFields.first().first,
+                expectedRecord
+            )
+
+            return false
+        }
+
+        for ((label, type) in actualRecord.labels.zip(actualRecord.types)) {
+            val expectedTypeForLabelIdx = expectedRecord.labels.indexOf(label)
+            val expectedTypeForLabel = expectedRecord.types.getOrNull(expectedTypeForLabelIdx) ?: continue
+
+            if (type is RecordType) {
+                if (expectedTypeForLabel !is RecordType) {
+                    errorManager.registerError(
+                        StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
+                        expectedTypeForLabel,
+                        type,
+                        ctx
+                    )
+                    return false
+                }
+
+                if (!validateRecords(expectedTypeForLabel, type, ctx)) {
+                    return false
+                }
+            } else {
+                if (type != expectedTypeForLabel) {
+                    if (expectedTypeForLabel !is RecordType) {
+                        errorManager.registerError(
+                            StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
+                            expectedTypeForLabel,
+                            type,
+                            ctx
+                        )
+                        return false
+                    }
+                }
+            }
+        }
+
+        return true
     }
 
     private fun visitFix(ctx: stellaParser.FixContext, expectedType: IType?): IType? {
@@ -830,7 +896,7 @@ internal class TypeChecker(
     }
 
     private fun visitConsList(ctx: stellaParser.ConsListContext, expectedType: IType?): ListType? {
-        if (expectedType != null && expectedType !is ListType) {
+        if (expectedType != null && expectedType !is ListType && expectedType !is TopType) {
             val listType = visitConsList(ctx, null) ?: return null
             errorManager.registerError(
                 StellaErrorType.ERROR_UNEXPECTED_LIST,
@@ -844,15 +910,8 @@ internal class TypeChecker(
         val head = ctx.head
         val headType = visitExpression(head, null) ?: return null
 
-        if (expectedType != null && (expectedType as ListType).type != headType) {
-            errorManager.registerError(
-                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
-                expectedType.type,
-                headType,
-                head
-            )
-
-            return null
+        if (expectedType != null && expectedType is ListType) {
+            validateTypes(headType, expectedType.type, ctx) ?: return null
         }
 
         val resultType = ListType(headType)
@@ -950,7 +1009,7 @@ internal class TypeChecker(
     }
 
     private fun visitRef(ctx: stellaParser.RefContext, expectedType: IType?): ReferenceType? {
-        if (expectedType != null && expectedType !is ReferenceType) {
+        if (expectedType != null && expectedType !is ReferenceType && expectedType !is TopType) {
             val ref = visitRef(ctx, null) ?: return null
             errorManager.registerError(
                 StellaErrorType.ERROR_UNEXPECTED_REFERENCE,
@@ -961,8 +1020,8 @@ internal class TypeChecker(
             return null
         }
 
-        val innerExpectedType = if (expectedType != null) {
-            (expectedType as ReferenceType).innerType
+        val innerExpectedType = if (expectedType != null && expectedType is ReferenceType) {
+            expectedType.innerType
         } else null
 
         val innerType = visitExpression(ctx.expr_, innerExpectedType) ?: return null
@@ -975,6 +1034,16 @@ internal class TypeChecker(
             errorManager.registerError(
                 StellaErrorType.ERROR_AMBIGUOUS_REFERENCE_TYPE,
                 ctx
+            )
+
+            return null
+        }
+
+        if (expectedType !is ReferenceType) {
+            errorManager.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_MEMORY_ADDRESS,
+                ctx,
+                expectedType
             )
 
             return null

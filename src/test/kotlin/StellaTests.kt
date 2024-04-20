@@ -624,6 +624,10 @@ class ERROR_MISSING_RECORD_FIELDS_TESTS {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_MISSING_RECORD_FIELDS, "simple_missing_fields")
     }
     @Test
+    fun `subtyping_record test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_MISSING_RECORD_FIELDS, "subtyping_record")
+    }
+    @Test
     fun `record_in_record test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_MISSING_RECORD_FIELDS, "record_in_record")
     }
@@ -700,6 +704,10 @@ class ERROR_NOT_A_RECORD_TESTS {
 @Suppress("ClassName")
 class ERROR_NOT_A_REFERENCE_TESTS {
     @Test
+    fun `deref_parameter test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NOT_A_REFERENCE, "deref_parameter")
+    }
+    @Test
     fun `assignment_to_non_ref_parameter test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NOT_A_REFERENCE, "assignment_to_non_ref_parameter")
     }
@@ -745,6 +753,15 @@ class ERROR_UNEXPECTED_TUPLE_LENGTH_TESTS {
 }
 
 @Suppress("ClassName")
+class ERROR_UNEXPECTED_MEMORY_ADDRESS_TESTS {
+    @Test
+    fun `memory_in_if_2 test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_MEMORY_ADDRESS, "memory_in_if_2")
+    }
+    
+}
+
+@Suppress("ClassName")
 class ERROR_UNEXPECTED_VARIANT_LABEL_TESTS {
     @Test
     fun `subtyping_variant test`() {
@@ -767,10 +784,6 @@ class ERROR_UNEXPECTED_VARIANT_LABEL_TESTS {
 
 @Suppress("ClassName")
 class ERROR_UNEXPECTED_RECORD_FIELDS_TESTS {
-    @Test
-    fun `subtyping_record test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_RECORD_FIELDS, "subtyping_record")
-    }
     @Test
     fun `return_record_with_missing_fields test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_RECORD_FIELDS, "return_record_with_missing_fields")
