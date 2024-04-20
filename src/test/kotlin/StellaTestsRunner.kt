@@ -32,6 +32,7 @@ object StellaTestsRunner {
         StellaExtension.Exceptions,
         StellaExtension.ExceptionTypeDeclaration,
         StellaExtension.StructuralSubtyping,
+        StellaExtension.TypeCast,
         StellaExtension.TopType,
         StellaExtension.BottomType,
         StellaExtension.AmbiguousTypeAsBottom,

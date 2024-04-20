@@ -87,6 +87,7 @@ internal class TypeChecker(
             is stellaParser.ThrowContext -> visitThrow(ctx, expectedType)
             is stellaParser.TryWithContext -> visitTryWith(ctx, expectedType)
             is stellaParser.TryCatchContext -> visitTryCatch(ctx, expectedType)
+            is stellaParser.TypeCastContext -> visitTypeCast(ctx, expectedType)
             else -> {
                 println("unsupported syntax for ${ctx::class.java}")
                 null
@@ -1159,5 +1160,12 @@ internal class TypeChecker(
         visitExpression(ctx.fallbackExpr, expectedType) ?: return null
 
         return mainType
+    }
+
+    private fun visitTypeCast(ctx: stellaParser.TypeCastContext, expectedType: IType?): IType? {
+        visitExpression(ctx.expr_, null) ?: return null
+        val actualType = SyntaxTypeProcessor.getType(ctx.type_)
+
+        return validateTypes(actualType, expectedType, ctx)
     }
 }
