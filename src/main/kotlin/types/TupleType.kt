@@ -19,4 +19,6 @@ class TupleType(
     override fun hashCode(): Int {
         return types.hashCode()
     }
+
+    override fun toString(): String = name
 }

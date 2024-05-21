@@ -6,4 +6,6 @@ object BotType : IType {
     override fun equals(other: Any?): Boolean {
         return other != null && other is BotType
     }
+
+    override fun toString(): String = name
 }

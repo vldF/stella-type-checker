@@ -6,4 +6,6 @@ object TopType : IType {
     override fun equals(other: Any?): Boolean {
         return other != null && other is TopType
     }
+
+    override fun toString(): String = name
 }

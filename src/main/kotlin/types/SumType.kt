@@ -25,4 +25,5 @@ class SumType(
         return result
     }
 
+    override fun toString(): String = name
 }

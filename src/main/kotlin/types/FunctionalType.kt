@@ -22,7 +22,5 @@ class FunctionalType(
         return result
     }
 
-    companion object {
-        const val unknownFunctionalTypeName: String = "functional type"
-    }
+    override fun toString(): String = name
 }

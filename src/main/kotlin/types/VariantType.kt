@@ -26,4 +26,5 @@ class VariantType(
         return result
     }
 
+    override fun toString(): String = name
 }

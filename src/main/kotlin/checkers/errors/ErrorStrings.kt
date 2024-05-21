@@ -37,5 +37,7 @@ object ErrorStrings {
         StellaErrorType.ERROR_UNEXPECTED_MEMORY_ADDRESS to "unexpected memory address while %s is expected",
         StellaErrorType.ERROR_EXCEPTION_TYPE_NOT_DECLARED to "exception type is not declared",
         StellaErrorType.ERROR_UNEXPECTED_SUBTYPE to "expected subtype of %s but got type %s in %s",
+        StellaErrorType.ERROR_OCCURS_CHECK_INFINITE_TYPE to "infinite type found while checking expression %s",
+        StellaErrorType.ERROR_NOT_A_GENERIC_FUNCTION to "Got a generic function %s",
     )
 }

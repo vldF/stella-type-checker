@@ -63,7 +63,8 @@ class ExhaustivenessChecker {
         context: stellaParser.PatternContext,
         errorManager: ErrorManager,
     ): Boolean {
-        if (actualPatternType == expectedType::class) {
+        // todo?
+        if (expectedType is TypeVar || actualPatternType == expectedType::class) {
             return true
         }
 
@@ -90,6 +91,7 @@ class ExhaustivenessChecker {
             is ReferenceType -> true
             is TopType -> TODO()
             is BotType -> TODO()
+            is TypeVar -> true // todo
         }
     }
 
@@ -136,6 +138,7 @@ class ExhaustivenessChecker {
             is ReferenceType -> null
             is TopType -> null
             is BotType -> null
+            is TypeVar -> null
         }
     }
 

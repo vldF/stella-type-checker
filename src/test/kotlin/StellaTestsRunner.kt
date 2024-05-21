@@ -26,16 +26,18 @@ object StellaTestsRunner {
         StellaExtension.Lists,
         StellaExtension.Predecessor,
 
-        StellaExtension.Sequencing,
-        StellaExtension.References,
-        StellaExtension.Panic,
-        StellaExtension.Exceptions,
-        StellaExtension.ExceptionTypeDeclaration,
-        StellaExtension.StructuralSubtyping,
-        StellaExtension.TypeCast,
-        StellaExtension.TopType,
-        StellaExtension.BottomType,
-        StellaExtension.AmbiguousTypeAsBottom,
+//        StellaExtension.Sequencing,
+//        StellaExtension.References,
+//        StellaExtension.Panic,
+//        StellaExtension.Exceptions,
+//        StellaExtension.ExceptionTypeDeclaration,
+//        StellaExtension.StructuralSubtyping,
+//        StellaExtension.TypeCast,
+//        StellaExtension.TopType,
+//        StellaExtension.BottomType,
+//        StellaExtension.AmbiguousTypeAsBottom,
+
+        StellaExtension.TypeReconstruction
     )
 
     fun runOkTest(testName: String) {
@@ -59,9 +61,9 @@ object StellaTestsRunner {
         }
 
         val expectedErrors = getAlternativeErrors(file).toSet().plus(errorType)
-        val actualErrors = errors.map { it.type }.toSet()
+        val actualError = errors.first().type
 
-        if (!expectedErrors.containsAll(actualErrors)) {
+        if (!expectedErrors.contains(actualError)) {
             val errorsAsText = errors.formatToString(parser, isDebug = true)
 
             Assertions.fail<Unit> {

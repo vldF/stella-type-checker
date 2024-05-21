@@ -19,5 +19,5 @@ class ReferenceType(
         return result
     }
 
-
+    override fun toString(): String = name
 }

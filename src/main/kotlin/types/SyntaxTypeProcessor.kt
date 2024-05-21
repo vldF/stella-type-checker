@@ -16,6 +16,7 @@ object SyntaxTypeProcessor {
             is stellaParser.TypeVariantContext -> visitVariantType(ctx)
             is stellaParser.TypeListContext -> visitListType(ctx)
             is stellaParser.TypeRefContext -> visitRefType(ctx)
+            is stellaParser.TypeAutoContext -> TypeVar.new()
             else -> error("unknown type")
         }
     }

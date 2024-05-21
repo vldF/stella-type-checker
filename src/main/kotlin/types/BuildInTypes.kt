@@ -6,6 +6,8 @@ object NatType : IType {
     override fun equals(other: Any?): Boolean {
         return other != null && other is NatType
     }
+
+    override fun toString(): String = name
 }
 
 object BoolType : IType {
@@ -14,6 +16,8 @@ object BoolType : IType {
     override fun equals(other: Any?): Boolean {
         return other != null && other is BoolType
     }
+
+    override fun toString(): String = name
 }
 
 object UnitType : IType {
@@ -22,4 +26,6 @@ object UnitType : IType {
     override fun equals(other: Any?): Boolean {
         return other != null && other is UnitType
     }
+
+    override fun toString(): String = name
 }

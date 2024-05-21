@@ -3,6 +3,10 @@ package checkers.types
 import StellaExtension
 import checkers.errors.ErrorManager
 import checkers.errors.StellaErrorType
+import checkers.types.inferrer.UnificationFailed
+import checkers.types.inferrer.UnificationFailedInfiniteType
+import checkers.types.inferrer.UnificationOk
+import checkers.types.inferrer.UnifySolver
 import org.antlr.v4.runtime.ParserRuleContext
 import utils.paramName
 import stellaParser
@@ -12,7 +16,8 @@ import utils.functionName
 internal class TypeChecker(
     private val errorManager: ErrorManager,
     parentContext: TypeContext? = null,
-    private val extensionManager: ExtensionManager = ExtensionManager()
+    private val extensionManager: ExtensionManager = ExtensionManager(),
+    private val unifySolver: UnifySolver = UnifySolver(),
 ) {
     private val context = TypeContext(parentContext)
 
@@ -23,6 +28,24 @@ internal class TypeChecker(
         topLevelInfoCollector.visitProgram(ctx)
 
         ctx.decls.forEach(::visitDecl)
+
+        when (val unificationResult = unifySolver.solve()) {
+            is UnificationFailed -> {
+                errorManager.registerError(
+                    StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
+                    unificationResult.expectedType,
+                    unificationResult.actualType,
+                    unificationResult.expression
+                )
+            }
+            is UnificationFailedInfiniteType -> {
+                errorManager.registerError(
+                    StellaErrorType.ERROR_OCCURS_CHECK_INFINITE_TYPE,
+                    unificationResult.expression
+                )
+            }
+            UnificationOk -> {}
+        }
     }
 
     private fun addExtensions(ctxs: List<stellaParser.ExtensionContext>) {
@@ -108,11 +131,11 @@ internal class TypeChecker(
         val topLevelInfoCollector = TopLevelInfoCollector(functionContext)
         ctx.children.forEach { c -> topLevelInfoCollector.visit(c) }
 
-        val innerTypeCheckerVisitor = TypeChecker(errorManager, functionContext, extensionManager)
+        val innerTypeCheckerVisitor = TypeChecker(errorManager, functionContext, extensionManager, unifySolver)
         ctx.localDecls.forEach { c -> innerTypeCheckerVisitor.visitDecl(c) }
 
         val returnExpr = ctx.returnExpr
-        val typeInferrer = TypeChecker(errorManager, functionContext, extensionManager)
+        val typeInferrer = TypeChecker(errorManager, functionContext, extensionManager, unifySolver)
 
         typeInferrer.visitExpression(returnExpr, expectedFunctionRetType)
     }
@@ -156,65 +179,14 @@ internal class TypeChecker(
        visitExpression(ctx.n, NatType)
 
         val initialValueType = visitExpression(ctx.initial, expectedType) ?: return null
-        val stepFunctionType = visitExpression(ctx.step, null) ?: return null
-
-        if (stepFunctionType !is FunctionalType) {
-            errorManager.registerError(
-                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
-                FunctionalType.unknownFunctionalTypeName,
-                stepFunctionType,
-                ctx.step
-            )
-            return null
-        }
-
-        if (stepFunctionType.from != NatType) {
-            val errorNode = (ctx.step as? stellaParser.AbstractionContext)?.paramDecl ?: ctx.step
-
-            errorManager.registerError(
-                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_PARAMETER,
-                NatType,
-                stepFunctionType.from,
-                errorNode
-            )
-            return null
-        }
-
-        if (stepFunctionType.to !is FunctionalType) {
-            errorManager.registerError(
-                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
-                FunctionalType.unknownFunctionalTypeName,
-                stepFunctionType.to,
-                ctx.step
-            )
-            return null
-        }
-
-        if (stepFunctionType.to.from != stepFunctionType.to.to) {
-            errorManager.registerError(
-                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
-                stepFunctionType.to.to,
-                stepFunctionType.to.from,
-                ctx.step
-            )
-            return null
-        }
-
-        if (stepFunctionType.to.from != initialValueType) {
-            errorManager.registerError(
-                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
-                initialValueType,
-                stepFunctionType.to.from,
-                ctx.step
-            )
-            return null
-        }
+        val expectedStepFunctionType = FunctionalType(NatType, FunctionalType(initialValueType, initialValueType))
+        visitExpression(ctx.step, expectedStepFunctionType) ?: return null
 
         return initialValueType
     }
 
-    private fun visitAbstraction(ctx: stellaParser.AbstractionContext, expectedType: IType?): FunctionalType? {
-        if (expectedType != null && expectedType !is FunctionalType) {
+    private fun visitAbstraction(ctx: stellaParser.AbstractionContext, expectedType: IType?): IType? {
+        if (expectedType != null && expectedType !is FunctionalType && expectedType !is TypeVar) {
             val actualType = visitExpression(ctx, null) ?: return null
             errorManager.registerError(
                 StellaErrorType.ERROR_UNEXPECTED_LAMBDA,
@@ -231,19 +203,40 @@ internal class TypeChecker(
 
         val innerContext = TypeContext(context)
         innerContext.saveVariableType(arg.paramName, argType)
-        val innerInferrer = TypeChecker(errorManager, innerContext, extensionManager)
+        val innerInferrer = TypeChecker(errorManager, innerContext, extensionManager, unifySolver)
 
         val returnExpr = ctx.returnExpr
-        val returnType = innerInferrer.visitExpression(returnExpr, (expectedType as FunctionalType?)?.to) ?: return null
+
+        val returnType = if (expectedType is TypeVar) {
+            val retTypeVar = TypeVar.new()
+
+            val expectedFuncType = FunctionalType(argType, retTypeVar)
+            unifySolver.addConstraint(expectedType, expectedFuncType, ctx)
+
+            innerInferrer.visitExpression(returnExpr, retTypeVar)
+        } else {
+            innerInferrer.visitExpression(returnExpr, (expectedType as FunctionalType?)?.to) ?: return null
+        } ?: return null
 
         val result = FunctionalType(argType, returnType)
-        return validateTypes(result, expectedType, ctx) as FunctionalType?
+        return validateTypes(result, expectedType, ctx)
     }
 
     private fun visitApplication(ctx: stellaParser.ApplicationContext, expectedType: IType?): IType? {
         val func = ctx.`fun`
 
         val funType = visitExpression(func, null) ?: return null
+
+        if (extensionManager.typeReconstruction) {
+            val arg = ctx.args.first()
+            val argType = visitExpression(arg, null) ?: return null
+
+            val expectedTypeOrVarType = expectedType ?: TypeVar.new()
+
+            unifySolver.addConstraint(funType, FunctionalType(argType, expectedTypeOrVarType), ctx)
+
+            return expectedTypeOrVarType
+        }
 
         if (funType !is FunctionalType) {
             errorManager.registerError(
@@ -255,18 +248,6 @@ internal class TypeChecker(
         }
 
         val resultType = funType.to
-//        if (expectedType != null) {
-//            if (resultType.isNotSubtypeOf(expectedType)) {
-//                errorManager.registerError(
-//                    StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
-//                    expectedType,
-//                    resultType,
-//                    ctx
-//                )
-//
-//                return null
-//            }
-//        }
 
         val arg = ctx.args.first()
         visitExpression(arg, funType.from) ?: return null
@@ -314,6 +295,20 @@ internal class TypeChecker(
     private fun visitDotTuple(ctx: stellaParser.DotTupleContext, expectedType: IType?): IType? {
         val expr = ctx.expr_
         val expressionType = visitExpression(expr, null) ?: return null
+        val indexContext = ctx.index
+        val indexValue = indexContext.text.toInt()
+
+        if (extensionManager.typeReconstruction) {
+            val pairType1 = TypeVar.new()
+            val pairType2 = TypeVar.new()
+
+            val pairType = TupleType(listOf(pairType1, pairType2))
+
+            unifySolver.addConstraint(expressionType, pairType, ctx)
+
+            return validateTypes(pairType.types[indexValue - 1], expectedType, ctx)
+        }
+
         if (expressionType !is TupleType) {
             errorManager.registerError(
                 StellaErrorType.ERROR_NOT_A_TUPLE,
@@ -323,8 +318,6 @@ internal class TypeChecker(
             return null
         }
 
-        val indexContext = ctx.index
-        val indexValue = indexContext.text.toInt()
         if (indexValue > expressionType.arity || indexValue == 0) {
             errorManager.registerError(
                 StellaErrorType.ERROR_TUPLE_INDEX_OUT_OF_BOUNDS,
@@ -415,7 +408,7 @@ internal class TypeChecker(
         val letContext = TypeContext(context)
         letContext.saveVariableType(name, expressionType)
 
-        val letTypeInferrer = TypeChecker(errorManager, letContext, extensionManager)
+        val letTypeInferrer = TypeChecker(errorManager, letContext, extensionManager, unifySolver)
         return letTypeInferrer.visitExpression(ctx.body, expectedType)
     }
 
@@ -443,7 +436,12 @@ internal class TypeChecker(
             return actualType
         }
 
-        if (actualType.isSubtypeOf(expectedType, extensionManager.structuralSubtyping)) {
+        if (extensionManager.typeReconstruction) {
+            unifySolver.addConstraint(actualType, expectedType, expression)
+            return expectedType
+        }
+
+        if (actualType == expectedType) {
             return expectedType
         }
 
@@ -488,21 +486,12 @@ internal class TypeChecker(
             }
         }
 
-        if (extensionManager.structuralSubtyping) {
-            errorManager.registerError(
-                StellaErrorType.ERROR_UNEXPECTED_SUBTYPE,
-                expectedType,
-                actualType,
-                expression
-            )
-        } else {
-            errorManager.registerError(
-                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
-                expectedType,
-                actualType,
-                expression
-            )
-        }
+        errorManager.registerError(
+            StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
+            expectedType,
+            actualType,
+            expression
+        )
 
         return null
     }
@@ -512,7 +501,7 @@ internal class TypeChecker(
         actualRecord: RecordType,
         ctx: ParserRuleContext
     ): Boolean {
-        if (expectedRecord != actualRecord && !extensionManager.structuralSubtyping) {
+        if (expectedRecord != actualRecord) {
             errorManager.registerError(
                 StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
                 expectedRecord,
@@ -530,17 +519,6 @@ internal class TypeChecker(
                 expectedRecord.labels.zip(expectedRecord.types).toSet()
 
         if (missingFields.isNotEmpty()) {
-            if (extensionManager.structuralSubtyping && missingFields.map { it.first }.all { it in actualRecord.labels }) {
-                errorManager.registerError(
-                    StellaErrorType.ERROR_UNEXPECTED_SUBTYPE,
-                    expectedRecord,
-                    actualRecord,
-                    ctx
-                )
-
-                return false
-            }
-
             errorManager.registerError(
                 StellaErrorType.ERROR_MISSING_RECORD_FIELDS,
                 missingFields.first().first,
@@ -550,7 +528,7 @@ internal class TypeChecker(
             return false
         }
 
-        if (extraFields.isNotEmpty() && !extensionManager.structuralSubtyping) {
+        if (extraFields.isNotEmpty()) {
             errorManager.registerError(
                 StellaErrorType.ERROR_UNEXPECTED_RECORD_FIELDS,
                 extraFields.first().first,
@@ -599,6 +577,13 @@ internal class TypeChecker(
     private fun visitFix(ctx: stellaParser.FixContext, expectedType: IType?): IType? {
         val expression = ctx.expr_
 
+        if (extensionManager.typeReconstruction) {
+            val expectedTypeOrVar = expectedType ?: TypeVar.new()
+            visitExpression(expression, FunctionalType(expectedTypeOrVar, expectedTypeOrVar))
+
+            return expectedTypeOrVar
+        }
+
         val expressionType = if (expectedType != null) {
             visitExpression(expression, FunctionalType(expectedType, expectedType))
         } else {
@@ -632,6 +617,11 @@ internal class TypeChecker(
     private fun visitMatch(ctx: stellaParser.MatchContext, expectedType: IType?): IType? {
         val expression = ctx.expr_
         val expressionType = visitExpression(expression, null) ?: return null
+
+        // todo
+        if (expressionType is TypeVar) {
+            return expectedType
+        }
 
         val cases = ctx.cases
 
@@ -675,7 +665,7 @@ internal class TypeChecker(
 
         for (case in cases) {
             val caseContext = TypeContext(context)
-            val caseInferrer = TypeChecker(errorManager, caseContext, extensionManager)
+            val caseInferrer = TypeChecker(errorManager, caseContext, extensionManager, unifySolver)
 
             val pattern = case.pattern_
             val bodyExpr = case.expr_
@@ -755,14 +745,17 @@ internal class TypeChecker(
 
     @Suppress("DuplicatedCode")
     private fun visitInl(ctx: stellaParser.InlContext, expectedType: IType?): IType? {
-        return if (expectedType == null && !extensionManager.structuralSubtyping) {
+        return if (expectedType == null && !extensionManager.typeReconstruction) {
             errorManager.registerError(
                 StellaErrorType.ERROR_AMBIGUOUS_SUM_TYPE,
                 ctx
             )
 
             null
-        } else if (expectedType != null && expectedType !is SumType && expectedType !is BotType) {
+        } else if (extensionManager.typeReconstruction) {
+            val leftType = visitExpression(ctx.expr_, null) ?: return null
+            SumType(leftType, TypeVar.new())
+        } else if (expectedType !is SumType && expectedType !is BotType && expectedType != null) {
             errorManager.registerError(
                 StellaErrorType.ERROR_UNEXPECTED_INJECTION,
                 expectedType
@@ -781,14 +774,17 @@ internal class TypeChecker(
 
     @Suppress("DuplicatedCode")
     private fun visitInr(ctx: stellaParser.InrContext, expectedType: IType?): IType? {
-        return if (expectedType == null && !extensionManager.structuralSubtyping) {
+        return if (expectedType == null && !extensionManager.typeReconstruction) {
             errorManager.registerError(
                 StellaErrorType.ERROR_AMBIGUOUS_SUM_TYPE,
                 ctx
             )
 
             null
-        } else if (expectedType != null && expectedType !is SumType && expectedType !is BotType) {
+        } else if (extensionManager.typeReconstruction) {
+            val rightType = visitExpression(ctx.expr_, null) ?: return null
+            SumType(TypeVar.new(), rightType)
+        } else if (expectedType !is SumType && expectedType !is BotType && expectedType != null) {
             errorManager.registerError(
                 StellaErrorType.ERROR_UNEXPECTED_INJECTION,
                 expectedType
@@ -813,12 +809,6 @@ internal class TypeChecker(
             )
 
             return null
-        } else if (expectedType == null && extensionManager.structuralSubtyping) {
-            val label = ctx.label.text
-            val expression = ctx.rhs
-            val expressionType = visitExpression(expression, null) ?: return null
-
-            return VariantType(listOf(label), listOf(expressionType))
         }
 
         expectedType as VariantType?
@@ -853,7 +843,15 @@ internal class TypeChecker(
         return expectedType
     }
 
-    private fun visitListContext(ctx: stellaParser.ListContext, expectedType: IType?): ListType? {
+    private fun visitListContext(ctx: stellaParser.ListContext, expectedType: IType?): IType? {
+        val expressions = ctx.exprs
+        if (extensionManager.typeReconstruction) {
+            val elementType = TypeVar.new()
+            expressions.forEach { visitExpression(it, elementType) }
+
+            return validateTypes(ListType(elementType), expectedType, ctx)
+        }
+
         if (expectedType != null && expectedType !is ListType) {
             val listType = visitListContext(ctx, null) ?: return null
             errorManager.registerError(
@@ -865,8 +863,7 @@ internal class TypeChecker(
             return null
         }
 
-        val expressions = ctx.exprs
-        if (expectedType == null && expressions.isEmpty() && !extensionManager.ambiguousTypeAsBottom) {
+        if (expectedType == null && expressions.isEmpty()) {
             errorManager.registerError(
                 StellaErrorType.ERROR_AMBIGUOUS_LIST_TYPE,
                 ctx
@@ -880,7 +877,16 @@ internal class TypeChecker(
             return null
         }
 
-        val listType = (expectedType as ListType?)?.type ?: expressionTypes.firstOrNull { it != null } ?: BotType
+        val listType = (expectedType as? ListType?)?.type ?: expressionTypes.firstOrNull { it != null } ?: BotType
+
+        if (extensionManager.typeReconstruction) {
+            expressionTypes.filterNotNull().forEach { expType ->
+                unifySolver.addConstraint(listType, expType, ctx)
+            }
+
+            return ListType(listType)
+        }
+
         val firstWrongTypedExpressionIndex = expressionTypes.indexOfFirst { it != listType }
 
         if (firstWrongTypedExpressionIndex != -1) {
@@ -897,7 +903,20 @@ internal class TypeChecker(
         return ListType(listType)
     }
 
-    private fun visitConsList(ctx: stellaParser.ConsListContext, expectedType: IType?): ListType? {
+    private fun visitConsList(ctx: stellaParser.ConsListContext, expectedType: IType?): IType? {
+        if (extensionManager.typeReconstruction) {
+            val elementType = TypeVar.new()
+            val listType = ListType(elementType)
+
+            val head = ctx.head
+            visitExpression(head, elementType) ?: return null
+
+            val tail = ctx.tail
+            visitExpression(tail, listType) ?: return null
+
+            return validateTypes(listType, expectedType, ctx)
+        }
+
         if (expectedType != null && expectedType !is ListType && expectedType !is TopType) {
             val listType = visitConsList(ctx, null) ?: return null
             errorManager.registerError(
@@ -1032,7 +1051,7 @@ internal class TypeChecker(
     }
 
     private fun visitConstMemory(ctx: stellaParser.ConstMemoryContext, expectedType: IType?): IType? {
-        if (expectedType == null && !extensionManager.ambiguousTypeAsBottom) {
+        if (expectedType == null) {
             errorManager.registerError(
                 StellaErrorType.ERROR_AMBIGUOUS_REFERENCE_TYPE,
                 ctx
@@ -1041,19 +1060,17 @@ internal class TypeChecker(
             return null
         }
 
-        val expectedTypeOrBot = expectedType ?: BotType
-
-        if (expectedTypeOrBot !is ReferenceType && expectedTypeOrBot !is TopType) {
+        if (expectedType !is ReferenceType && expectedType !is TopType) {
             errorManager.registerError(
                 StellaErrorType.ERROR_UNEXPECTED_MEMORY_ADDRESS,
                 ctx,
-                expectedTypeOrBot
+                expectedType
             )
 
             return null
         }
 
-        return expectedTypeOrBot
+        return expectedType
     }
 
     private fun visitDeref(ctx: stellaParser.DerefContext, expectedType: IType?): IType? {
@@ -1112,10 +1129,6 @@ internal class TypeChecker(
 
     private fun visitPanic(ctx: stellaParser.PanicContext, expectedType: IType?): IType? {
         if (expectedType == null) {
-            if (extensionManager.ambiguousTypeAsBottom) {
-                return BotType
-            }
-
             errorManager.registerError(
                 StellaErrorType.ERROR_AMBIGUOUS_PANIC_TYPE,
                 ctx
@@ -1128,7 +1141,7 @@ internal class TypeChecker(
     }
 
     private fun visitThrow(ctx: stellaParser.ThrowContext, expectedType: IType?): IType? {
-        if (expectedType == null && !extensionManager.ambiguousTypeAsBottom) {
+        if (expectedType == null) {
             errorManager.registerError(
                 StellaErrorType.ERROR_AMBIGUOUS_THROW_TYPE,
                 ctx
@@ -1148,7 +1161,7 @@ internal class TypeChecker(
 
         visitExpression(ctx.expr_, exceptionType) ?: return null
 
-        return expectedType ?: BotType
+        return expectedType
     }
 
     @Suppress("DuplicatedCode")
@@ -1191,7 +1204,7 @@ internal class TypeChecker(
 
         val newContext = TypeContext(context)
         newContext.saveVariableType(varName, exceptionType)
-        val newTypeChecker = TypeChecker(errorManager, newContext, extensionManager)
+        val newTypeChecker = TypeChecker(errorManager, newContext, extensionManager, unifySolver)
 
         newTypeChecker.visitExpression(ctx.fallbackExpr, expectedType) ?: return null
 

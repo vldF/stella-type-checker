@@ -18,6 +18,10 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("subtyping_nat")
     }
     @Test
+    fun `list_ascription_reconstruct test`() {
+        StellaTestsRunner.runOkTest("list_ascription_reconstruct")
+    }
+    @Test
     fun `memory_write_read_3 test`() {
         StellaTestsRunner.runOkTest("memory_write_read_3")
     }
@@ -26,12 +30,20 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("subtyping_top2")
     }
     @Test
+    fun `self_app test`() {
+        StellaTestsRunner.runOkTest("self_app")
+    }
+    @Test
     fun `semicolon test`() {
         StellaTestsRunner.runOkTest("semicolon")
     }
     @Test
     fun `subtyping_top test`() {
         StellaTestsRunner.runOkTest("subtyping_top")
+    }
+    @Test
+    fun `twice_bool_not_reconstruct test`() {
+        StellaTestsRunner.runOkTest("twice_bool_not_reconstruct")
     }
     @Test
     fun `subtyping_record test`() {
@@ -114,6 +126,14 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("variant_asc")
     }
     @Test
+    fun `sum_arg_reconstruct test`() {
+        StellaTestsRunner.runOkTest("sum_arg_reconstruct")
+    }
+    @Test
+    fun `simple_inl_reconstruct test`() {
+        StellaTestsRunner.runOkTest("simple_inl_reconstruct")
+    }
+    @Test
     fun `let_let test`() {
         StellaTestsRunner.runOkTest("let_let")
     }
@@ -124,6 +144,10 @@ class OK_TESTS {
     @Test
     fun `sum_arg test`() {
         StellaTestsRunner.runOkTest("sum_arg")
+    }
+    @Test
+    fun `parenthesis_reconstruct test`() {
+        StellaTestsRunner.runOkTest("parenthesis_reconstruct")
     }
     @Test
     fun `let_rec test`() {
@@ -170,6 +194,14 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("assignment_to_parameter")
     }
     @Test
+    fun `list_operations_reconstruct test`() {
+        StellaTestsRunner.runOkTest("list_operations_reconstruct")
+    }
+    @Test
+    fun `simple_sum_reconstruct test`() {
+        StellaTestsRunner.runOkTest("simple_sum_reconstruct")
+    }
+    @Test
     fun `let_bool test`() {
         StellaTestsRunner.runOkTest("let_bool")
     }
@@ -188,6 +220,10 @@ class OK_TESTS {
     @Test
     fun `int_literal test`() {
         StellaTestsRunner.runOkTest("int_literal")
+    }
+    @Test
+    fun `const test`() {
+        StellaTestsRunner.runOkTest("const")
     }
     @Test
     fun `cast_as test`() {
@@ -230,6 +266,10 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("subtyping_ref2")
     }
     @Test
+    fun `identity test`() {
+        StellaTestsRunner.runOkTest("identity")
+    }
+    @Test
     fun `nullary_variant test`() {
         StellaTestsRunner.runOkTest("nullary_variant")
     }
@@ -238,12 +278,24 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("exhaustive_variant")
     }
     @Test
+    fun `const_identity test`() {
+        StellaTestsRunner.runOkTest("const_identity")
+    }
+    @Test
     fun `list_operations test`() {
         StellaTestsRunner.runOkTest("list_operations")
     }
     @Test
+    fun `cons_reconstruct test`() {
+        StellaTestsRunner.runOkTest("cons_reconstruct")
+    }
+    @Test
     fun `let_unit test`() {
         StellaTestsRunner.runOkTest("let_unit")
+    }
+    @Test
+    fun `let_let_reconstruct test`() {
+        StellaTestsRunner.runOkTest("let_let_reconstruct")
     }
     @Test
     fun `subtyping_variant2 test`() {
@@ -302,6 +354,10 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("fixpoint")
     }
     @Test
+    fun `const2 test`() {
+        StellaTestsRunner.runOkTest("const2")
+    }
+    @Test
     fun `simple_pair test`() {
         StellaTestsRunner.runOkTest("simple_pair")
     }
@@ -320,6 +376,14 @@ class OK_TESTS {
     @Test
     fun `list_ascription test`() {
         StellaTestsRunner.runOkTest("list_ascription")
+    }
+    @Test
+    fun `fix_from_arg_reconstruct test`() {
+        StellaTestsRunner.runOkTest("fix_from_arg_reconstruct")
+    }
+    @Test
+    fun `increment_twice_reconstruct test`() {
+        StellaTestsRunner.runOkTest("increment_twice_reconstruct")
     }
     @Test
     fun `letrec_fn test`() {
@@ -350,6 +414,10 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("panic_from_task")
     }
     @Test
+    fun `simple_inr_reconstruct test`() {
+        StellaTestsRunner.runOkTest("simple_inr_reconstruct")
+    }
+    @Test
     fun `nullary_variant_pattern test`() {
         StellaTestsRunner.runOkTest("nullary_variant_pattern")
     }
@@ -358,8 +426,20 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("let_if")
     }
     @Test
+    fun `infer_fix_reconstruct test`() {
+        StellaTestsRunner.runOkTest("infer_fix_reconstruct")
+    }
+    @Test
+    fun `infer_cons test`() {
+        StellaTestsRunner.runOkTest("infer_cons")
+    }
+    @Test
     fun `subtyping_ref test`() {
         StellaTestsRunner.runOkTest("subtyping_ref")
+    }
+    @Test
+    fun `fixpoint_reconstruct test`() {
+        StellaTestsRunner.runOkTest("fixpoint_reconstruct")
     }
     @Test
     fun `sequencing_basic test`() {
@@ -422,6 +502,14 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("subtyping_tuple2")
     }
     @Test
+    fun `simple_ascription_reconstruct test`() {
+        StellaTestsRunner.runOkTest("simple_ascription_reconstruct")
+    }
+    @Test
+    fun `infer_cons_reconstruct test`() {
+        StellaTestsRunner.runOkTest("infer_cons_reconstruct")
+    }
+    @Test
     fun `try_catch_variant test`() {
         StellaTestsRunner.runOkTest("try_catch_variant")
     }
@@ -434,6 +522,10 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("try_catch_with_structural_pattern")
     }
     @Test
+    fun `square_reconstruct test`() {
+        StellaTestsRunner.runOkTest("square_reconstruct")
+    }
+    @Test
     fun `variant_attempt test`() {
         StellaTestsRunner.runOkTest("variant_attempt")
     }
@@ -444,6 +536,14 @@ class OK_TESTS {
     @Test
     fun `let_fun test`() {
         StellaTestsRunner.runOkTest("let_fun")
+    }
+    @Test
+    fun `let_square_reconstruct test`() {
+        StellaTestsRunner.runOkTest("let_square_reconstruct")
+    }
+    @Test
+    fun `let_fun_reconstruct test`() {
+        StellaTestsRunner.runOkTest("let_fun_reconstruct")
     }
     @Test
     fun `simple_unit test`() {
@@ -477,6 +577,15 @@ class ERROR_UNEXPECTED_REFERENCE_TESTS {
     @Test
     fun `return_ref_from_non_reference_function_complex test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_REFERENCE, "return_ref_from_non_reference_function_complex")
+    }
+    
+}
+
+@Suppress("ClassName")
+class ERROR_NOT_A_GENERIC_FUNCTION_TESTS {
+    @Test
+    fun `const2_not_generic test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NOT_A_GENERIC_FUNCTION, "const2_not_generic")
     }
     
 }
@@ -558,12 +667,20 @@ class ERROR_NONEXHAUSTIVE_MATCH_PATTERNS_TESTS {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS, "ne_sum_nat")
     }
     @Test
+    fun `nonexhaustive_match_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS, "nonexhaustive_match_reconstruct")
+    }
+    @Test
     fun `ne_list test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS, "ne_list")
     }
     @Test
     fun `ne_nat_1 test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS, "ne_nat_1")
+    }
+    @Test
+    fun `ne_sum_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS, "ne_sum_reconstruct")
     }
     @Test
     fun `ne_bool test`() {
@@ -613,6 +730,10 @@ class ERROR_ILLEGAL_EMPTY_MATCHING_TESTS {
     @Test
     fun `empty_match test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_ILLEGAL_EMPTY_MATCHING, "empty_match")
+    }
+    @Test
+    fun `empty_match_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_ILLEGAL_EMPTY_MATCHING, "empty_match_reconstruct")
     }
     
 }
@@ -762,6 +883,19 @@ class ERROR_UNEXPECTED_MEMORY_ADDRESS_TESTS {
 }
 
 @Suppress("ClassName")
+class ERROR_INCORRECT_NUMBER_OF_TYPE_ARGUMENTS_TESTS {
+    @Test
+    fun `const_many_vars test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_INCORRECT_NUMBER_OF_TYPE_ARGUMENTS, "const_many_vars")
+    }
+    @Test
+    fun `const_few_vars test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_INCORRECT_NUMBER_OF_TYPE_ARGUMENTS, "const_few_vars")
+    }
+    
+}
+
+@Suppress("ClassName")
 class ERROR_UNEXPECTED_VARIANT_LABEL_TESTS {
     @Test
     fun `subtyping_variant test`() {
@@ -808,6 +942,10 @@ class ERROR_UNDEFINED_VARIABLE_TESTS {
     @Test
     fun `in_let test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNDEFINED_VARIABLE, "in_let")
+    }
+    @Test
+    fun `undefined_var_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNDEFINED_VARIABLE, "undefined_var_reconstruct")
     }
     
 }
@@ -968,8 +1106,24 @@ class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "sequencing_wrong_return_type")
     }
     @Test
+    fun `unexpected_inr_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "unexpected_inr_reconstruct")
+    }
+    @Test
     fun `let_list test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "let_list")
+    }
+    @Test
+    fun `succ_true_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "succ_true_reconstruct")
+    }
+    @Test
+    fun `simple_ascription2_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "simple_ascription2_reconstruct")
+    }
+    @Test
+    fun `lamda_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "lamda_reconstruct")
     }
     @Test
     fun `unexpected_iszero test`() {
@@ -978,6 +1132,10 @@ class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
     @Test
     fun `assignment_ref_ref_wrong_type test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "assignment_ref_ref_wrong_type")
+    }
+    @Test
+    fun `simple_let_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "simple_let_reconstruct")
     }
     @Test
     fun `throw_invalid_type test`() {
@@ -992,8 +1150,20 @@ class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "simple_let")
     }
     @Test
+    fun `check_inr_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "check_inr_reconstruct")
+    }
+    @Test
+    fun `apply_pair_2_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "apply_pair_2_reconstruct")
+    }
+    @Test
     fun `try_cast_as_fallback test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "try_cast_as_fallback")
+    }
+    @Test
+    fun `infer_match_list_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "infer_match_list_reconstruct")
     }
     @Test
     fun `try_cast_as_expr test`() {
@@ -1008,12 +1178,24 @@ class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "unexpected_isempty")
     }
     @Test
+    fun `recurstion_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "recurstion_reconstruct")
+    }
+    @Test
     fun `unexpected_tail test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "unexpected_tail")
     }
     @Test
     fun `const_tail test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "const_tail")
+    }
+    @Test
+    fun `unexpected_application_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "unexpected_application_reconstruct")
+    }
+    @Test
+    fun `if_nat_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "if_nat_reconstruct")
     }
     @Test
     fun `record_dot test`() {
@@ -1032,12 +1214,28 @@ class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "nested_function_params_shadowing")
     }
     @Test
+    fun `infer_match_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "infer_match_reconstruct")
+    }
+    @Test
     fun `my-mismatch test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "my-mismatch")
     }
     @Test
+    fun `no_nat_rec_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "no_nat_rec_reconstruct")
+    }
+    @Test
     fun `return_deref_wrong_ref test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "return_deref_wrong_ref")
+    }
+    @Test
+    fun `cons_head_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "cons_head_reconstruct")
+    }
+    @Test
+    fun `is_zero_bool_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "is_zero_bool_reconstruct")
     }
     @Test
     fun `test-1 test`() {
@@ -1080,6 +1278,10 @@ class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "fix_from_arg")
     }
     @Test
+    fun `lambda_wrong_argument_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "lambda_wrong_argument_reconstruct")
+    }
+    @Test
     fun `int_literal test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "int_literal")
     }
@@ -1092,8 +1294,32 @@ class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "false_return")
     }
     @Test
+    fun `let_list_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "let_list_reconstruct")
+    }
+    @Test
     fun `bad-records-6 test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "bad-records-6")
+    }
+    @Test
+    fun `const_identity test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "const_identity")
+    }
+    @Test
+    fun `is_empty_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "is_empty_reconstruct")
+    }
+    @Test
+    fun `cons_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "cons_reconstruct")
+    }
+    @Test
+    fun `int_literal_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "int_literal_reconstruct")
+    }
+    @Test
+    fun `unexpected_inl_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "unexpected_inl_reconstruct")
     }
     @Test
     fun `unexpected_unit test`() {
@@ -1102,6 +1328,10 @@ class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
     @Test
     fun `unexpected_application test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "unexpected_application")
+    }
+    @Test
+    fun `square_bad_square_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "square_bad_square_reconstruct")
     }
     @Test
     fun `check_inl test`() {
@@ -1124,8 +1354,28 @@ class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "succ_true")
     }
     @Test
+    fun `tail_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "tail_reconstruct")
+    }
+    @Test
+    fun `simple_list_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "simple_list_reconstruct")
+    }
+    @Test
+    fun `bad-return-type-reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "bad-return-type-reconstruct")
+    }
+    @Test
     fun `call_with_wrong_ref_type test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "call_with_wrong_ref_type")
+    }
+    @Test
+    fun `bad-pairs-16-reconstruction test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "bad-pairs-16-reconstruction")
+    }
+    @Test
+    fun `check_inl_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "check_inl_reconstruct")
     }
     @Test
     fun `panic_in_one_branch_bool_in_another test`() {
@@ -1144,6 +1394,10 @@ class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "sequencing_non_unit_type1")
     }
     @Test
+    fun `function_return_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "function_return_reconstruct")
+    }
+    @Test
     fun `different_branches test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "different_branches")
     }
@@ -1152,8 +1406,40 @@ class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "no_nat_rec")
     }
     @Test
+    fun `square_bad_add_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "square_bad_add_reconstruct")
+    }
+    @Test
+    fun `fix_from_arg_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "fix_from_arg_reconstruct")
+    }
+    @Test
+    fun `different_branches_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "different_branches_reconstruct")
+    }
+    @Test
+    fun `const_tail_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "const_tail_reconstruct")
+    }
+    @Test
     fun `unexpected_zero_param test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "unexpected_zero_param")
+    }
+    @Test
+    fun `head_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "head_reconstruct")
+    }
+    @Test
+    fun `const_succ test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "const_succ")
+    }
+    @Test
+    fun `asc_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "asc_reconstruct")
+    }
+    @Test
+    fun `infer_fix_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "infer_fix_reconstruct")
     }
     @Test
     fun `infer_cons test`() {
@@ -1162,6 +1448,14 @@ class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
     @Test
     fun `bad-pairs-16 test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "bad-pairs-16")
+    }
+    @Test
+    fun `false_return_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "false_return_reconstruct")
+    }
+    @Test
+    fun `fixpoint_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "fixpoint_reconstruct")
     }
     @Test
     fun `return_lambda_with_wrong_return test`() {
@@ -1176,12 +1470,28 @@ class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "bad-records-13")
     }
     @Test
+    fun `lambda_wrong_second_argument_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "lambda_wrong_second_argument_reconstruct")
+    }
+    @Test
+    fun `simple_ascription_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "simple_ascription_reconstruct")
+    }
+    @Test
     fun `bad-return-type test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "bad-return-type")
     }
     @Test
+    fun `infer_cons_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "infer_cons_reconstruct")
+    }
+    @Test
     fun `cons_head test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "cons_head")
+    }
+    @Test
+    fun `apply_pair_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "apply_pair_reconstruct")
     }
     @Test
     fun `deref_memory test`() {
@@ -1192,12 +1502,20 @@ class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "function_return")
     }
     @Test
+    fun `test-1_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "test-1_reconstruct")
+    }
+    @Test
     fun `simple_ascription test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "simple_ascription")
     }
     @Test
     fun `if_nat test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "if_nat")
+    }
+    @Test
+    fun `not_a_f_fix_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "not_a_f_fix_reconstruct")
     }
     @Test
     fun `infer_match test`() {
@@ -1256,6 +1574,10 @@ class ERROR_UNEXPECTED_PATTERN_FOR_TYPE_TESTS {
     @Test
     fun `try_catch_unepected_pattern test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_PATTERN_FOR_TYPE, "try_catch_unepected_pattern")
+    }
+    @Test
+    fun `unexpected_pattern_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_PATTERN_FOR_TYPE, "unexpected_pattern_reconstruct")
     }
     @Test
     fun `tuple_size test`() {
@@ -1398,6 +1720,15 @@ class ERROR_TUPLE_INDEX_OUT_OF_BOUNDS_TESTS {
 }
 
 @Suppress("ClassName")
+class ERROR_UNDEFINED_TYPE_VARIABLE_TESTS {
+    @Test
+    fun `const_undefined_var test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNDEFINED_TYPE_VARIABLE, "const_undefined_var")
+    }
+    
+}
+
+@Suppress("ClassName")
 class ERROR_INCORRECT_ARITY_OF_MAIN_TESTS {
     @Test
     fun `main_with_zero_param test`() {
@@ -1406,6 +1737,19 @@ class ERROR_INCORRECT_ARITY_OF_MAIN_TESTS {
     @Test
     fun `main_with_two_params test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_INCORRECT_ARITY_OF_MAIN, "main_with_two_params")
+    }
+    
+}
+
+@Suppress("ClassName")
+class ERROR_OCCURS_CHECK_INFINITE_TYPE_TESTS {
+    @Test
+    fun `infinite_function_type test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_OCCURS_CHECK_INFINITE_TYPE, "infinite_function_type")
+    }
+    @Test
+    fun `infinite_function_fix_type test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_OCCURS_CHECK_INFINITE_TYPE, "infinite_function_fix_type")
     }
     
 }
