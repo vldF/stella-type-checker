@@ -14,6 +14,10 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("try_with_try_and_with_throws")
     }
     @Test
+    fun `match_sum_type_reconstruct_2 test`() {
+        StellaTestsRunner.runOkTest("match_sum_type_reconstruct_2")
+    }
+    @Test
     fun `subtyping_nat test`() {
         StellaTestsRunner.runOkTest("subtyping_nat")
     }
@@ -508,6 +512,10 @@ class OK_TESTS {
     @Test
     fun `infer_cons_reconstruct test`() {
         StellaTestsRunner.runOkTest("infer_cons_reconstruct")
+    }
+    @Test
+    fun `match_sum_type_reconstruct_1 test`() {
+        StellaTestsRunner.runOkTest("match_sum_type_reconstruct_1")
     }
     @Test
     fun `try_catch_variant test`() {
@@ -1110,6 +1118,10 @@ class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "unexpected_inr_reconstruct")
     }
     @Test
+    fun `match_sum_type_reconstruct_2 test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "match_sum_type_reconstruct_2")
+    }
+    @Test
     fun `let_list test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "let_list")
     }
@@ -1190,6 +1202,10 @@ class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "const_tail")
     }
     @Test
+    fun `match_sum_type_reconstruct_3 test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "match_sum_type_reconstruct_3")
+    }
+    @Test
     fun `unexpected_application_reconstruct test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "unexpected_application_reconstruct")
     }
@@ -1244,6 +1260,10 @@ class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
     @Test
     fun `sequencing_non_unit_type2 test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "sequencing_non_unit_type2")
+    }
+    @Test
+    fun `const2_no_forall test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "const2_no_forall")
     }
     @Test
     fun `check_inr test`() {
@@ -1484,6 +1504,10 @@ class ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION_TESTS {
     @Test
     fun `infer_cons_reconstruct test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "infer_cons_reconstruct")
+    }
+    @Test
+    fun `match_sum_type_reconstruct_1 test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION, "match_sum_type_reconstruct_1")
     }
     @Test
     fun `cons_head test`() {

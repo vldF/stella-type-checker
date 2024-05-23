@@ -496,6 +496,20 @@ internal class TypeChecker(
         return null
     }
 
+    private fun validatePattern(expectedType: IType, actualType: IType, context: stellaParser.PatternContext): IType? {
+        if (expectedType == actualType) {
+            return expectedType
+        }
+
+        errorManager.registerError(
+            StellaErrorType.ERROR_UNEXPECTED_PATTERN_FOR_TYPE,
+            context,
+            expectedType
+        )
+
+        return null
+    }
+
     private fun validateRecords(
         expectedRecord: RecordType,
         actualRecord: RecordType,
@@ -615,132 +629,182 @@ internal class TypeChecker(
     }
 
     private fun visitMatch(ctx: stellaParser.MatchContext, expectedType: IType?): IType? {
-        val expression = ctx.expr_
-        val expressionType = visitExpression(expression, null) ?: return null
-
-        // todo
-        if (expressionType is TypeVar) {
-            return expectedType
-        }
+        val matchExprType = visitExpression(ctx.expr_, expectedType = null) ?: return null
 
         val cases = ctx.cases
 
         if (cases.isEmpty()) {
-            errorManager.registerError(
-                StellaErrorType.ERROR_ILLEGAL_EMPTY_MATCHING,
-                ctx
-            )
+            errorManager.registerError(StellaErrorType.ERROR_ILLEGAL_EMPTY_MATCHING, ctx)
+            return null
+        }
 
+        val branchExpressions = cases.map { case ->
+            val newContext = TypeContext(context)
+            val newChecker = TypeChecker(errorManager, newContext, extensionManager, unifySolver)
+
+
+            newChecker.visitPatternContext(case.pattern_, matchExprType) ?: return null
+            newChecker.visitExpression(case.expr_, expectedType) ?: return null
+        }
+
+        if (branchExpressions.size != cases.size) {
             return null
         }
 
         val patterns = cases.map { it.pattern_ }
-        val exhaustivenessChecker = ExhaustivenessChecker()
-        if (!exhaustivenessChecker.checkForPatternsTypeMissmatch(patterns, expressionType, errorManager)) {
+        if (!ExhaustivenessChecker().check(patterns, matchExprType)) {
+            errorManager.registerError(
+                StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS,
+                matchExprType
+            )
+
             return null
         }
 
-        val wrongPattern = exhaustivenessChecker.findWrongPattern(patterns, expressionType)
-        if (wrongPattern != null) {
+        val matchType = branchExpressions.first()
+        val firstWrongType = branchExpressions.firstOrNull { validateTypes(matchType, it, ctx) == null }
+        if (firstWrongType != null) {
+            errorManager.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
+                matchType,
+                firstWrongType,
+                ctx
+            )
+            return null
+        }
+
+        return matchType
+    }
+
+    private fun visitPatternContext(ctx: stellaParser.PatternContext, expectedType: IType): IType? {
+        val resultType = when (ctx) {
+            is stellaParser.PatternConsContext -> visitPatternConsContext(ctx, expectedType)
+            is stellaParser.PatternTrueContext -> visitTruePatternContext(ctx, expectedType)
+            is stellaParser.PatternFalseContext -> visitFalsePatternContext(ctx, expectedType)
+            is stellaParser.PatternUnitContext -> visitUnitPatternContext(ctx, expectedType)
+            is stellaParser.PatternVarContext -> visitVarPatternContext(ctx, expectedType)
+            is stellaParser.PatternAscContext -> visitAscPatternContext(ctx, expectedType)
+            is stellaParser.ParenthesisedPatternContext -> visitPatternContext(ctx.pattern_, expectedType)
+            is stellaParser.PatternInlContext -> visitInlPatternContext(ctx, expectedType)
+            is stellaParser.PatternInrContext -> visitInrPatternContext(ctx, expectedType)
+            is stellaParser.PatternVariantContext -> visitVariantPatternContext(ctx, expectedType)
+            else -> null
+        } ?: return null
+
+        return validatePattern(resultType, expectedType, ctx)
+    }
+
+    private fun visitPatternConsContext(ctx: stellaParser.PatternConsContext, expectedType: IType): IType? {
+        if (expectedType !is ListType) {
             errorManager.registerError(
                 StellaErrorType.ERROR_UNEXPECTED_PATTERN_FOR_TYPE,
-                wrongPattern,
+                ctx,
+                expectedType
+            )
+
+            return null
+        }
+
+        visitPatternContext(ctx.head, expectedType.type)
+        visitPatternContext(ctx.tail, expectedType)
+
+        return expectedType
+    }
+
+    private fun visitTruePatternContext(ctx: stellaParser.PatternTrueContext, expectedType: IType): IType? {
+        return validatePattern(BoolType, expectedType, ctx)
+    }
+
+    private fun visitFalsePatternContext(ctx: stellaParser.PatternFalseContext, expectedType: IType): IType? {
+        return validatePattern(BoolType, expectedType, ctx)
+    }
+
+    private fun visitUnitPatternContext(ctx: stellaParser.PatternUnitContext, expectedType: IType): IType? {
+        return validatePattern(UnitType, expectedType, ctx)
+    }
+
+    private fun visitVarPatternContext(ctx: stellaParser.PatternVarContext, expectedType: IType): IType {
+        context.saveVariableType(ctx.name.text, expectedType)
+
+        return expectedType
+    }
+
+    private fun visitAscPatternContext(ctx: stellaParser.PatternAscContext, expectedType: IType): IType? {
+        val type = SyntaxTypeProcessor.getType(ctx.type_)
+        val trueType = validatePattern(type, expectedType, ctx) // todo?
+
+        if (trueType == null) {
+            errorManager.registerError(
+                StellaErrorType.ERROR_AMBIGUOUS_PATTERN_TYPE,
+                type,
                 ctx
             )
 
             return null
         }
 
-        val arePatternsExhaustive = exhaustivenessChecker.arePatternsExhaustive(patterns, expressionType)
-        if (!arePatternsExhaustive) {
+        return visitPatternContext(ctx.pattern_, trueType)
+    }
+
+    private fun visitInlPatternContext(ctx: stellaParser.PatternInlContext, expectedType: IType): IType? {
+        if (expectedType !is SumType) {
             errorManager.registerError(
-                StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS,
-                expressionType
+                StellaErrorType.ERROR_UNEXPECTED_PATTERN_FOR_TYPE,
+                ctx,
+                expectedType
             )
 
             return null
         }
 
-        var resultType: IType? = null
+        visitPatternContext(ctx.pattern_, expectedType.left) ?: return null
 
-        for (case in cases) {
-            val caseContext = TypeContext(context)
-            val caseInferrer = TypeChecker(errorManager, caseContext, extensionManager, unifySolver)
+        return expectedType
+    }
 
-            val pattern = case.pattern_
-            val bodyExpr = case.expr_
+    private fun visitInrPatternContext(ctx: stellaParser.PatternInrContext, expectedType: IType): IType? {
+        if (expectedType !is SumType) {
+            errorManager.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_PATTERN_FOR_TYPE,
+                ctx,
+                expectedType
+            )
 
-            @Suppress("DuplicatedCode")
-            val caseType = when (pattern) {
-                is stellaParser.PatternInlContext -> {
-                    expressionType as SumType
-                    val variableName = (pattern.pattern_ as? stellaParser.PatternVarContext)?.name?.text ?: return null
-                    val type = expressionType.left
-                    caseContext.saveVariableType(variableName, type)
-
-                    caseInferrer.visitExpression(bodyExpr, expectedType)
-                }
-
-                is stellaParser.PatternInrContext -> {
-                    expressionType as SumType
-                    val variableName = (pattern.pattern_ as? stellaParser.PatternVarContext)?.name?.text ?: return null
-                    val type = expressionType.right
-                    caseContext.saveVariableType(variableName, type)
-
-                    caseInferrer.visitExpression(bodyExpr, expectedType)
-                }
-
-                is stellaParser.PatternVariantContext -> {
-                    expressionType as VariantType
-                    val labelName = pattern.label.text
-                    val labelIndex = expressionType.labels.indexOf(labelName)
-                    if (labelIndex == -1) {
-                        errorManager.registerError(
-                            StellaErrorType.ERROR_UNEXPECTED_VARIANT_LABEL,
-                            labelName,
-                            pattern,
-                            expectedType ?: return null
-                        )
-
-                        return null
-                    }
-
-                    val labelType = expressionType.types[labelIndex]
-
-                    val variableName = (pattern.pattern_ as? stellaParser.PatternVarContext)?.name?.text ?: return null
-
-                    caseContext.saveVariableType(variableName, labelType)
-
-                    caseInferrer.visitExpression(bodyExpr, expectedType)
-                }
-
-                is stellaParser.PatternVarContext -> {
-                    val variableName = pattern.name.text
-                    caseContext.saveVariableType(variableName, expressionType)
-
-                    caseInferrer.visitExpression(bodyExpr, expectedType)
-                }
-
-                else -> { // todo
-                    caseInferrer.visitExpression(bodyExpr, expectedType)
-                }
-            }
-
-            caseType ?: return null
-
-            if (resultType != null && resultType != caseType) {
-                errorManager.registerError(
-                    StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
-                    resultType,
-                    caseType,
-                    bodyExpr
-                )
-            }
-
-            resultType = caseType
+            return null
         }
 
-        return resultType
+       visitPatternContext(ctx.pattern_, expectedType.right) ?: return null
+        return expectedType
+    }
+
+    private fun visitVariantPatternContext(ctx: stellaParser.PatternVariantContext, expectedType: IType): IType? {
+        if (expectedType !is VariantType) {
+            errorManager.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_PATTERN_FOR_TYPE,
+                ctx,
+                expectedType
+            )
+
+            return null
+        }
+
+        val tagName = ctx.label.text
+        val varTypeIdx = expectedType.labels.indexOf(tagName)
+        if (varTypeIdx == -1) {
+            errorManager.registerError(
+                StellaErrorType.ERROR_UNEXPECTED_PATTERN_FOR_TYPE,
+                ctx,
+                expectedType
+            )
+
+            return null
+        }
+
+        val varType = expectedType.types[varTypeIdx]
+
+        visitPatternContext(ctx.pattern_, varType) ?: return null
+
+        return expectedType
     }
 
     @Suppress("DuplicatedCode")
