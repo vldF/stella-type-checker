@@ -25,8 +25,8 @@ class ExhaustivenessChecker {
             NatType -> processNatPattern(patterns)
             UnitType -> processUnitPattern(patterns)
             is SumType -> processSumPattern(patterns)
+            is TypeVar -> processVariantsWithTypeVar(patterns)
             is VariantType -> processVariantPattern(patterns, expectedType)
-            is TypeVar -> true
             else -> false
         }
     }
@@ -56,5 +56,19 @@ class ExhaustivenessChecker {
         val labelsInType = type.labels.toSet()
 
         return labelsInPattern.toSet().containsAll(labelsInType)
+    }
+
+    private fun processVariantsWithTypeVar(patterns: List<stellaParser.PatternContext>): Boolean {
+        var result = true
+
+        if (patterns.any { it is stellaParser.PatternInlContext || it is stellaParser.PatternInrContext }) {
+            result = processSumPattern(patterns)
+        }
+
+        if (patterns.any { it is stellaParser.PatternTrueContext || it is stellaParser.PatternFalseContext }) {
+            result = processBoolPattern(patterns)
+        }
+
+        return result
     }
 }

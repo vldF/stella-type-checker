@@ -501,6 +501,11 @@ internal class TypeChecker(
             return expectedType
         }
 
+        if (extensionManager.typeReconstruction) {
+            unifySolver.addConstraint(expectedType, actualType, context)
+            return expectedType
+        }
+
         errorManager.registerError(
             StellaErrorType.ERROR_UNEXPECTED_PATTERN_FOR_TYPE,
             context,
@@ -747,6 +752,17 @@ internal class TypeChecker(
     }
 
     private fun visitInlPatternContext(ctx: stellaParser.PatternInlContext, expectedType: IType): IType? {
+        if (expectedType is TypeVar) {
+            val sumTypeLeft = TypeVar.new()
+            val sumTypeRight = TypeVar.new()
+            val sumType = SumType(sumTypeLeft, sumTypeRight)
+
+            unifySolver.addConstraint(expectedType, sumType, ctx)
+            visitPatternContext(ctx.pattern_, sumTypeLeft) ?: return null
+
+            return expectedType
+        }
+
         if (expectedType !is SumType) {
             errorManager.registerError(
                 StellaErrorType.ERROR_UNEXPECTED_PATTERN_FOR_TYPE,
@@ -763,6 +779,17 @@ internal class TypeChecker(
     }
 
     private fun visitInrPatternContext(ctx: stellaParser.PatternInrContext, expectedType: IType): IType? {
+        if (expectedType is TypeVar) {
+            val sumTypeLeft = TypeVar.new()
+            val sumTypeRight = TypeVar.new()
+            val sumType = SumType(sumTypeLeft, sumTypeRight)
+
+            unifySolver.addConstraint(expectedType, sumType, ctx)
+            visitPatternContext(ctx.pattern_, sumTypeRight) ?: return null
+
+            return expectedType
+        }
+
         if (expectedType !is SumType) {
             errorManager.registerError(
                 StellaErrorType.ERROR_UNEXPECTED_PATTERN_FOR_TYPE,

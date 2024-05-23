@@ -675,16 +675,16 @@ class ERROR_NONEXHAUSTIVE_MATCH_PATTERNS_TESTS {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS, "ne_sum_nat")
     }
     @Test
-    fun `nonexhaustive_match_reconstruct test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS, "nonexhaustive_match_reconstruct")
-    }
-    @Test
     fun `ne_list test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS, "ne_list")
     }
     @Test
     fun `ne_nat_1 test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS, "ne_nat_1")
+    }
+    @Test
+    fun `nonexhaustive_match_bool test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS, "nonexhaustive_match_bool")
     }
     @Test
     fun `ne_sum_reconstruct test`() {
@@ -703,6 +703,14 @@ class ERROR_NONEXHAUSTIVE_MATCH_PATTERNS_TESTS {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS, "ne_sum")
     }
     @Test
+    fun `nonexhaustive_match_sum_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS, "nonexhaustive_match_sum_reconstruct")
+    }
+    @Test
+    fun `nonexhaustive_match_bool_reconstruct test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS, "nonexhaustive_match_bool_reconstruct")
+    }
+    @Test
     fun `ne_nat_3 test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS, "ne_nat_3")
     }
@@ -711,16 +719,16 @@ class ERROR_NONEXHAUSTIVE_MATCH_PATTERNS_TESTS {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS, "ne_nat_2")
     }
     @Test
-    fun `nonexhaustive_match test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS, "nonexhaustive_match")
-    }
-    @Test
     fun `nonexhaustive_variant test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS, "nonexhaustive_variant")
     }
     @Test
     fun `ne_record test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS, "ne_record")
+    }
+    @Test
+    fun `nonexhaustive_match_sum test`() {
+        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_NONEXHAUSTIVE_MATCH_PATTERNS, "nonexhaustive_match_sum")
     }
     @Test
     fun `ne_tuple test`() {
