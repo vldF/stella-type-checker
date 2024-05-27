@@ -15,9 +15,9 @@ import utils.functionName
 
 internal class TypeChecker(
     private val errorManager: ErrorManager,
-    parentContext: TypeContext? = null,
-    private val extensionManager: ExtensionManager = ExtensionManager(),
-    private val unifySolver: UnifySolver = UnifySolver(),
+    parentContext: TypeContext?,
+    private val extensionManager: ExtensionManager,
+    private val unifySolver: UnifySolver,
 ) {
     private val context = TypeContext(parentContext)
 
@@ -62,6 +62,7 @@ internal class TypeChecker(
         when (ctx) {
             is stellaParser.DeclFunContext -> visitDeclFun(ctx)
             is stellaParser.DeclExceptionTypeContext -> visitDeclExceptionType(ctx)
+            is stellaParser.DeclFunGenericContext -> visitDeclFunGeneric(ctx)
         }
     }
 
@@ -111,6 +112,8 @@ internal class TypeChecker(
             is stellaParser.TryWithContext -> visitTryWith(ctx, expectedType)
             is stellaParser.TryCatchContext -> visitTryCatch(ctx, expectedType)
             is stellaParser.TypeCastContext -> visitTypeCast(ctx, expectedType)
+            is stellaParser.TypeApplicationContext -> visitTypeApplication(ctx, expectedType)
+            is stellaParser.TypeAbstractionContext -> visitTypeAbstraction(ctx, expectedType)
             else -> {
                 println("unsupported syntax for ${ctx::class.java}")
                 null
@@ -122,7 +125,7 @@ internal class TypeChecker(
 
     private fun visitDeclFun(ctx: stellaParser.DeclFunContext) {
         val functionName = ctx.functionName
-        val functionType = context.resolveFunctionType(functionName) ?: return
+        val functionType = context.resolveFunctionType(functionName) as? FunctionalType? ?: return
         val expectedFunctionRetType = functionType.to
 
         val functionContext = TypeContext(context)
@@ -135,9 +138,33 @@ internal class TypeChecker(
         ctx.localDecls.forEach { c -> innerTypeCheckerVisitor.visitDecl(c) }
 
         val returnExpr = ctx.returnExpr
-        val typeInferrer = TypeChecker(errorManager, functionContext, extensionManager, unifySolver)
+        val typeChecker = TypeChecker(errorManager, functionContext, extensionManager, unifySolver)
 
-        typeInferrer.visitExpression(returnExpr, expectedFunctionRetType)
+        typeChecker.visitExpression(returnExpr, expectedFunctionRetType)
+    }
+
+    private fun visitDeclFunGeneric(ctx: stellaParser.DeclFunGenericContext) {
+        val functionName = ctx.name.text
+        val functionUniversalType = context.resolveFunctionType(functionName) as UniversalWrapperType
+        val functionType = functionUniversalType.innerType as FunctionalType
+
+        val expectedFunctionRetType = functionType.to
+
+        val functionContext = TypeContext(context)
+        functionContext.saveVariableType(ctx.paramDecl.paramName, functionType.from)
+
+        functionUniversalType.typeParams.forEach { functionContext.saveGenericType(it) }
+
+        val topLevelInfoCollector = TopLevelInfoCollector(functionContext)
+        ctx.children.forEach { c -> topLevelInfoCollector.visit(c) }
+
+        val innerTypeCheckerVisitor = TypeChecker(errorManager, functionContext, extensionManager, unifySolver)
+        ctx.localDecls.forEach { c -> innerTypeCheckerVisitor.visitDecl(c) }
+
+        val returnExpr = ctx.returnExpr
+        val typeChecker = TypeChecker(errorManager, functionContext, extensionManager, unifySolver)
+
+        typeChecker.visitExpression(returnExpr, expectedFunctionRetType)
     }
 
     private fun visitIf(ctx: stellaParser.IfContext, expectedType: IType?): IType? {
@@ -200,6 +227,10 @@ internal class TypeChecker(
 
         val arg = ctx.paramDecl
         val argType = SyntaxTypeProcessor.getType(arg.paramType)
+
+        if (!ensureTypeIsKnown(argType)) {
+            return null
+        }
 
         val innerContext = TypeContext(context)
         innerContext.saveVariableType(arg.paramName, argType)
@@ -415,6 +446,10 @@ internal class TypeChecker(
     private fun visitTypeAsc(ctx: stellaParser.TypeAscContext, expectedType: IType?): IType? {
         val expression = ctx.expr_
         val targetType = SyntaxTypeProcessor.getType(ctx.type_)
+
+        if (!ensureTypeIsKnown(targetType)) {
+            return null
+        }
 
         val expressionType = visitExpression(expression, expectedType ?: targetType) ?: return null
 
@@ -736,6 +771,9 @@ internal class TypeChecker(
 
     private fun visitAscPatternContext(ctx: stellaParser.PatternAscContext, expectedType: IType): IType? {
         val type = SyntaxTypeProcessor.getType(ctx.type_)
+        if (!ensureTypeIsKnown(type)) {
+            return null
+        }
         val trueType = validatePattern(type, expectedType, ctx) // todo?
 
         if (trueType == null) {
@@ -1306,6 +1344,115 @@ internal class TypeChecker(
         visitExpression(ctx.expr_, null) ?: return null
         val actualType = SyntaxTypeProcessor.getType(ctx.type_)
 
+        if (!ensureTypeIsKnown(actualType)) {
+            return null
+        }
+
         return validateTypes(actualType, expectedType, ctx)
+    }
+
+    private fun visitTypeApplication(ctx: stellaParser.TypeApplicationContext, expectedType: IType?): IType? {
+        val func = ctx.`fun`
+
+        val funTypeWithGenerics = visitExpression(func, null) ?: return null
+
+        if (funTypeWithGenerics !is UniversalWrapperType || funTypeWithGenerics.innerType !is FunctionalType) {
+            errorManager.registerError(
+                StellaErrorType.ERROR_NOT_A_GENERIC_FUNCTION,
+                ctx
+            )
+
+            return null
+        }
+
+        val funGenerics = funTypeWithGenerics.typeParams
+        val generics = ctx.types.map { SyntaxTypeProcessor.getType(it) }
+        if (funGenerics.size != generics.size) {
+            errorManager.registerError(
+                StellaErrorType.ERROR_INCORRECT_NUMBER_OF_TYPE_ARGUMENTS,
+                generics.size,
+                funGenerics.size
+            )
+
+            return null
+        }
+
+        val genericsSubstitutions = funGenerics.zip(generics).toMap()
+
+        val funTypeAfterSubstitution = funTypeWithGenerics.innerType.withSubstitution(genericsSubstitutions)
+        val undefinedType = funTypeAfterSubstitution.getFirstUnresolvedType()
+        if (undefinedType != null) {
+            errorManager.registerError(
+                StellaErrorType.ERROR_UNDEFINED_TYPE_VARIABLE,
+                undefinedType
+            )
+
+            return null
+        }
+
+        return validateTypes(funTypeAfterSubstitution, expectedType, ctx)
+    }
+
+    private fun IType.getFirstUnresolvedType(): IType? {
+        return when (this) {
+            is FunctionalType -> this.from.getFirstUnresolvedType() ?: this.to.getFirstUnresolvedType()
+            is ListType -> this.type.getFirstUnresolvedType()
+            is SumType -> this.left.getFirstUnresolvedType() ?: this.right.getFirstUnresolvedType()
+            is TupleType -> this.types.firstNotNullOfOrNull { it.getFirstUnresolvedType() }
+            is GenericType -> when {
+                context.resolveGenericType(this) == null -> this
+                else -> null
+            }
+            else -> null
+        }
+    }
+
+    private fun visitTypeAbstraction(ctx: stellaParser.TypeAbstractionContext, expectedType: IType?): IType? {
+        val expectedFuncType = when (expectedType) {
+            is UniversalWrapperType -> {
+                expectedType.innerType as FunctionalType
+            }
+            is FunctionalType -> {
+                expectedType
+            }
+            else -> {
+                val actualType = visitExpression(ctx, null) ?: return null
+
+                errorManager.registerError(
+                    StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
+                    expectedType ?: "unknown",
+                    actualType,
+                    ctx
+                )
+
+                return null
+            }
+        }
+        val typeParams = ctx.generics.map { GenericType(it.text) }
+
+        val newContext = TypeContext(context)
+        typeParams.forEach { newContext.saveGenericType(it) }
+        val newTypeChecker = TypeChecker(errorManager, newContext, extensionManager, unifySolver)
+        val actualFuncType = newTypeChecker.visitExpression(ctx.expr_, expectedFuncType) ?: return null
+
+        return UniversalWrapperType(typeParams, actualFuncType)
+    }
+
+    private fun ensureTypeIsKnown(type: IType): Boolean {
+        if (type !is GenericType) {
+            return true
+        }
+
+        val typeFromContext = context.resolveGenericType(type)
+
+        if (typeFromContext == null) {
+            errorManager.registerError(
+                StellaErrorType.ERROR_UNDEFINED_TYPE_VARIABLE,
+                type
+            )
+            return false
+        }
+
+        return true
     }
 }

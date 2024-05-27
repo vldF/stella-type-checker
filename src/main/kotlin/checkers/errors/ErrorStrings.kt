@@ -39,6 +39,8 @@ object ErrorStrings {
         StellaErrorType.ERROR_UNEXPECTED_SUBTYPE to "expected subtype of %s but got type %s in %s",
         StellaErrorType.ERROR_OCCURS_CHECK_INFINITE_TYPE to "infinite type found while checking expression %s",
         StellaErrorType.ERROR_AMBIGUOUS_PATTERN_TYPE to "ambiguous type %s of pattern %s",
-        StellaErrorType.ERROR_NOT_A_GENERIC_FUNCTION to "Got a generic function %s",
+        StellaErrorType.ERROR_NOT_A_GENERIC_FUNCTION to "expected a generic function, but got non-generic function %s",
+        StellaErrorType.ERROR_INCORRECT_NUMBER_OF_TYPE_ARGUMENTS to "Got unexpected arguments cont, expected %s but got %s",
+        StellaErrorType.ERROR_UNDEFINED_TYPE_VARIABLE to "Type variable %s is undefined",
     )
 }

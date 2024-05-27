@@ -3,9 +3,7 @@ package checkers.types
 import org.antlr.v4.runtime.tree.RuleNode
 import stellaParser
 import stellaParserBaseVisitor
-import types.FunctionalType
-import types.SyntaxTypeProcessor
-import types.TypeContext
+import types.*
 import utils.functionName
 
 class TopLevelInfoCollector(
@@ -20,6 +18,20 @@ class TopLevelInfoCollector(
         val functionType = FunctionalType(argType, returnType)
 
         typeContext.saveFunctionType(name, functionType)
+    }
+
+    override fun visitDeclFunGeneric(ctx: stellaParser.DeclFunGenericContext) {
+        val name = ctx.functionName
+
+        val paramDecl = ctx.paramDecls?.firstOrNull() ?: return
+        val argType = SyntaxTypeProcessor.getType(paramDecl.paramType)
+        val returnType = SyntaxTypeProcessor.getType(ctx.returnType)
+        val generics = ctx.generics.map { GenericType(it.text) }
+
+        val functionType = FunctionalType(argType, returnType)
+        val forallType = UniversalWrapperType(generics, functionType)
+
+        typeContext.saveFunctionType(name, forallType)
     }
 
     override fun visitChildren(node: RuleNode) {

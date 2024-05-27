@@ -17,9 +17,13 @@ object SyntaxTypeProcessor {
             is stellaParser.TypeListContext -> visitListType(ctx)
             is stellaParser.TypeRefContext -> visitRefType(ctx)
             is stellaParser.TypeAutoContext -> TypeVar.new()
+            is stellaParser.TypeVarContext -> visitTypeVarContext(ctx)
+            is stellaParser.TypeForAllContext -> UniversalWrapperType(ctx.types.map { GenericType(it.text) }, getType(ctx.type_))
             else -> error("unknown type")
         }
     }
+
+    private fun visitTypeVarContext(ctx: stellaParser.TypeVarContext) = GenericType(ctx.name.text)
 
     private fun visitTypeTuple(ctx: stellaParser.TypeTupleContext): TupleType {
         val types = ctx.types.map { getType(it) }

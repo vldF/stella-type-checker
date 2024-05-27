@@ -37,7 +37,8 @@ object StellaTestsRunner {
 //        StellaExtension.BottomType,
 //        StellaExtension.AmbiguousTypeAsBottom,
 
-        StellaExtension.TypeReconstruction
+        StellaExtension.TypeReconstruction,
+        StellaExtension.UniversalTypes,
     )
 
     fun runOkTest(testName: String) {
