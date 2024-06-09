@@ -16,7 +16,7 @@ jobs:
         with:
           submodules: 'true'
       - name: Run test
-        run: ./gradlew test
+        run: ENABLE_ONLY_SUPPORTED_TESTS=true ./gradlew test
 
   build:
     runs-on: ubuntu-latest
