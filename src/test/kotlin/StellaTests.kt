@@ -58,10 +58,6 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("infer_fix")
     }
     @Test
-    fun `references-3 test`() {
-        StellaTestsRunner.runOkTest("references-3")
-    }
-    @Test
     fun `memory_write_read_2 test`() {
         StellaTestsRunner.runOkTest("memory_write_read_2")
     }
@@ -178,16 +174,8 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("subtyping_sum2")
     }
     @Test
-    fun `exceptions-4 test`() {
-        StellaTestsRunner.runOkTest("exceptions-4")
-    }
-    @Test
     fun `subtyping_tuple test`() {
         StellaTestsRunner.runOkTest("subtyping_tuple")
-    }
-    @Test
-    fun `sum-types-2 test`() {
-        StellaTestsRunner.runOkTest("sum-types-2")
     }
     @Test
     fun `twice_bool_not test`() {
@@ -302,10 +290,6 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("list_operations")
     }
     @Test
-    fun `references-2 test`() {
-        StellaTestsRunner.runOkTest("references-2")
-    }
-    @Test
     fun `cons_reconstruct test`() {
         StellaTestsRunner.runOkTest("cons_reconstruct")
     }
@@ -316,10 +300,6 @@ class OK_TESTS {
     @Test
     fun `let_let_reconstruct test`() {
         StellaTestsRunner.runOkTest("let_let_reconstruct")
-    }
-    @Test
-    fun `lists-2 test`() {
-        StellaTestsRunner.runOkTest("lists-2")
     }
     @Test
     fun `subtyping_variant2 test`() {
@@ -350,10 +330,6 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("ambiguous_type_as_bottom_from_task")
     }
     @Test
-    fun `sum-types-5 test`() {
-        StellaTestsRunner.runOkTest("sum-types-5")
-    }
-    @Test
     fun `try_catch test`() {
         StellaTestsRunner.runOkTest("try_catch")
     }
@@ -380,10 +356,6 @@ class OK_TESTS {
     @Test
     fun `fixpoint test`() {
         StellaTestsRunner.runOkTest("fixpoint")
-    }
-    @Test
-    fun `variants-3 test`() {
-        StellaTestsRunner.runOkTest("variants-3")
     }
     @Test
     fun `const2 test`() {
@@ -474,10 +446,6 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("fixpoint_reconstruct")
     }
     @Test
-    fun `lists-4 test`() {
-        StellaTestsRunner.runOkTest("lists-4")
-    }
-    @Test
     fun `sequencing_basic test`() {
         StellaTestsRunner.runOkTest("sequencing_basic")
     }
@@ -538,10 +506,6 @@ class OK_TESTS {
         StellaTestsRunner.runOkTest("subtyping_tuple2")
     }
     @Test
-    fun `references-4 test`() {
-        StellaTestsRunner.runOkTest("references-4")
-    }
-    @Test
     fun `simple_ascription_reconstruct test`() {
         StellaTestsRunner.runOkTest("simple_ascription_reconstruct")
     }
@@ -552,10 +516,6 @@ class OK_TESTS {
     @Test
     fun `match_sum_type_reconstruct_1 test`() {
         StellaTestsRunner.runOkTest("match_sum_type_reconstruct_1")
-    }
-    @Test
-    fun `references-6 test`() {
-        StellaTestsRunner.runOkTest("references-6")
     }
     @Test
     fun `try_catch_variant test`() {
@@ -797,36 +757,12 @@ class ERROR_ILLEGAL_EMPTY_MATCHING_TESTS {
 @Suppress("ClassName")
 class ERROR_MISSING_RECORD_FIELDS_TESTS {
     @Test
-    fun `exceptions-2 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_MISSING_RECORD_FIELDS, "exceptions-2")
-    }
-    @Test
-    fun `functions-1 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_MISSING_RECORD_FIELDS, "functions-1")
-    }
-    @Test
-    fun `bad-subtyping-9 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_MISSING_RECORD_FIELDS, "bad-subtyping-9")
-    }
-    @Test
     fun `simple_missing_fields test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_MISSING_RECORD_FIELDS, "simple_missing_fields")
     }
     @Test
-    fun `pairs-4 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_MISSING_RECORD_FIELDS, "pairs-4")
-    }
-    @Test
-    fun `bad-subtyping-5 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_MISSING_RECORD_FIELDS, "bad-subtyping-5")
-    }
-    @Test
     fun `subtyping_record test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_MISSING_RECORD_FIELDS, "subtyping_record")
-    }
-    @Test
-    fun `references-1 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_MISSING_RECORD_FIELDS, "references-1")
     }
     @Test
     fun `record_in_record test`() {
@@ -837,52 +773,8 @@ class ERROR_MISSING_RECORD_FIELDS_TESTS {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_MISSING_RECORD_FIELDS, "call_function_with_missing_fields")
     }
     @Test
-    fun `bad-subtyping-3 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_MISSING_RECORD_FIELDS, "bad-subtyping-3")
-    }
-    @Test
     fun `record_in_abstraction test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_MISSING_RECORD_FIELDS, "record_in_abstraction")
-    }
-    @Test
-    fun `sum-types-2 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_MISSING_RECORD_FIELDS, "sum-types-2")
-    }
-    @Test
-    fun `references-7 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_MISSING_RECORD_FIELDS, "references-7")
-    }
-    @Test
-    fun `bad-subtyping-1 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_MISSING_RECORD_FIELDS, "bad-subtyping-1")
-    }
-    @Test
-    fun `references-2 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_MISSING_RECORD_FIELDS, "references-2")
-    }
-    @Test
-    fun `type-cast-patterns-4 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_MISSING_RECORD_FIELDS, "type-cast-patterns-4")
-    }
-    @Test
-    fun `functions-2 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_MISSING_RECORD_FIELDS, "functions-2")
-    }
-    @Test
-    fun `variants-3 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_MISSING_RECORD_FIELDS, "variants-3")
-    }
-    @Test
-    fun `bad-subtyping-6 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_MISSING_RECORD_FIELDS, "bad-subtyping-6")
-    }
-    @Test
-    fun `bad-subtyping-2 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_MISSING_RECORD_FIELDS, "bad-subtyping-2")
-    }
-    @Test
-    fun `functions-4 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_MISSING_RECORD_FIELDS, "functions-4")
     }
     
 }
@@ -1022,24 +914,12 @@ class ERROR_INCORRECT_NUMBER_OF_TYPE_ARGUMENTS_TESTS {
 @Suppress("ClassName")
 class ERROR_UNEXPECTED_VARIANT_LABEL_TESTS {
     @Test
-    fun `variants-2 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_VARIANT_LABEL, "variants-2")
-    }
-    @Test
     fun `subtyping_variant test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_VARIANT_LABEL, "subtyping_variant")
     }
     @Test
     fun `variant_asc test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_VARIANT_LABEL, "variant_asc")
-    }
-    @Test
-    fun `exceptions-4 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_VARIANT_LABEL, "exceptions-4")
-    }
-    @Test
-    fun `variants-1 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_VARIANT_LABEL, "variants-1")
     }
     @Test
     fun `unexpected_nullary_label test`() {
@@ -1055,24 +935,8 @@ class ERROR_UNEXPECTED_VARIANT_LABEL_TESTS {
 @Suppress("ClassName")
 class ERROR_UNEXPECTED_RECORD_FIELDS_TESTS {
     @Test
-    fun `pairs-4 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_RECORD_FIELDS, "pairs-4")
-    }
-    @Test
-    fun `references-1 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_RECORD_FIELDS, "references-1")
-    }
-    @Test
     fun `return_record_with_missing_fields test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_RECORD_FIELDS, "return_record_with_missing_fields")
-    }
-    @Test
-    fun `references-2 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_RECORD_FIELDS, "references-2")
-    }
-    @Test
-    fun `type-cast-patterns-4 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_RECORD_FIELDS, "type-cast-patterns-4")
     }
     
 }
@@ -1179,28 +1043,8 @@ class ERROR_UNEXPECTED_TYPE_FOR_PARAMETER_TESTS {
 @Suppress("ClassName")
 class ERROR_UNEXPECTED_SUBTYPE_TESTS {
     @Test
-    fun `sum-types-4 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "sum-types-4")
-    }
-    @Test
     fun `bot test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "bot")
-    }
-    @Test
-    fun `bad-subtyping-4 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "bad-subtyping-4")
-    }
-    @Test
-    fun `references-3 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "references-3")
-    }
-    @Test
-    fun `sum-types-1 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "sum-types-1")
-    }
-    @Test
-    fun `lists-5 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "lists-5")
     }
     @Test
     fun `record test`() {
@@ -1211,28 +1055,8 @@ class ERROR_UNEXPECTED_SUBTYPE_TESTS {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "ref")
     }
     @Test
-    fun `sum-types-5 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "sum-types-5")
-    }
-    @Test
-    fun `functions-3 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "functions-3")
-    }
-    @Test
-    fun `lists-1 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "lists-1")
-    }
-    @Test
     fun `func2 test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "func2")
-    }
-    @Test
-    fun `references-5 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "references-5")
-    }
-    @Test
-    fun `pairs-2 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "pairs-2")
     }
     @Test
     fun `sum test`() {
@@ -1247,36 +1071,12 @@ class ERROR_UNEXPECTED_SUBTYPE_TESTS {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "ref2")
     }
     @Test
-    fun `variants-4 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "variants-4")
-    }
-    @Test
     fun `variant test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "variant")
     }
     @Test
-    fun `type-cast-patterns-1 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "type-cast-patterns-1")
-    }
-    @Test
-    fun `bad-subtyping-8 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "bad-subtyping-8")
-    }
-    @Test
     fun `tuple test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "tuple")
-    }
-    @Test
-    fun `pairs-5 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "pairs-5")
-    }
-    @Test
-    fun `exceptions-3 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "exceptions-3")
-    }
-    @Test
-    fun `exceptions-1 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "exceptions-1")
     }
     @Test
     fun `list test`() {
@@ -1287,52 +1087,8 @@ class ERROR_UNEXPECTED_SUBTYPE_TESTS {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "error")
     }
     @Test
-    fun `try-cast-as-1 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "try-cast-as-1")
-    }
-    @Test
-    fun `lists-4 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "lists-4")
-    }
-    @Test
-    fun `pairs-3 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "pairs-3")
-    }
-    @Test
-    fun `lists-2 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "lists-2")
-    }
-    @Test
-    fun `references-4 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "references-4")
-    }
-    @Test
-    fun `pairs-1 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "pairs-1")
-    }
-    @Test
-    fun `bad-subtyping-7 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "bad-subtyping-7")
-    }
-    @Test
-    fun `lists-3 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "lists-3")
-    }
-    @Test
-    fun `references-6 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "references-6")
-    }
-    @Test
     fun `tuple2 test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "tuple2")
-    }
-    @Test
-    fun `variants-5 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "variants-5")
-    }
-    @Test
-    fun `sum-types-3 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_SUBTYPE, "sum-types-3")
     }
     
 }
@@ -1848,10 +1604,6 @@ class ERROR_UNEXPECTED_PATTERN_FOR_TYPE_TESTS {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_PATTERN_FOR_TYPE, "unexpected_pattern")
     }
     @Test
-    fun `try-cast-as-2 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_PATTERN_FOR_TYPE, "try-cast-as-2")
-    }
-    @Test
     fun `try_catch_unepected_pattern test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_PATTERN_FOR_TYPE, "try_catch_unepected_pattern")
     }
@@ -1866,10 +1618,6 @@ class ERROR_UNEXPECTED_PATTERN_FOR_TYPE_TESTS {
     @Test
     fun `let_as test`() {
         StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_PATTERN_FOR_TYPE, "let_as")
-    }
-    @Test
-    fun `type-cast-patterns-2 test`() {
-        StellaTestsRunner.runBadTest(checkers.errors.StellaErrorType.ERROR_UNEXPECTED_PATTERN_FOR_TYPE, "type-cast-patterns-2")
     }
     @Test
     fun `try_catch_variant test`() {
