@@ -47,14 +47,14 @@ internal class TypeChecker(
     }
 
     private fun visitExpression(ctx: stellaParser.ExprContext, expectedType: IType?): IType? {
-        val type = when (ctx) {
+        return when (ctx) {
             is stellaParser.ConstTrueContext -> BoolType
             is stellaParser.ConstFalseContext -> BoolType
             is stellaParser.ConstIntContext -> NatType
             is stellaParser.ConstUnitContext -> UnitType
-            is stellaParser.IsZeroContext -> visitIsZero(ctx)
-            is stellaParser.SuccContext -> visitSucc(ctx)
-            is stellaParser.PredContext -> visitPred(ctx)
+            is stellaParser.IsZeroContext -> visitIsZero(ctx, expectedType)
+            is stellaParser.SuccContext -> visitSucc(ctx, expectedType)
+            is stellaParser.PredContext -> visitPred(ctx, expectedType)
             is stellaParser.VarContext -> visitVar(ctx, expectedType)
             is stellaParser.DotRecordContext -> visitDotRecord(ctx, expectedType)
             is stellaParser.AbstractionContext -> visitAbstraction(ctx, expectedType)
@@ -92,9 +92,7 @@ internal class TypeChecker(
                 println("unsupported syntax for ${ctx::class.java}")
                 null
             }
-        } ?: return null
-
-        return validateTypes(type, expectedType, ctx)
+        }
     }
 
     private fun visitDeclFun(ctx: stellaParser.DeclFunContext) {
@@ -114,12 +112,15 @@ internal class TypeChecker(
         val returnExpr = ctx.returnExpr
         val typeInferrer = TypeChecker(errorManager, functionContext, extensionManager)
 
-        typeInferrer.visitExpression(returnExpr, expectedFunctionRetType)
+        val resultType = typeInferrer.visitExpression(returnExpr, expectedFunctionRetType) ?: return
+
+        validateTypes(resultType, expectedFunctionRetType, returnExpr)
     }
 
     private fun visitIf(ctx: stellaParser.IfContext, expectedType: IType?): IType? {
         val condition = ctx.condition
-        visitExpression(condition, BoolType) ?: return null
+        val condType = visitExpression(condition, BoolType) ?: return null
+        validateTypes(condType, BoolType, condition) ?: return null
 
         val thenType = visitExpression(ctx.thenExpr, expectedType) ?: return null
         val elseType = visitExpression(ctx.elseExpr, thenType) ?: return null
@@ -134,26 +135,35 @@ internal class TypeChecker(
             return null
         }
 
-        return thenType
+        validateTypes(thenType, elseType, ctx) ?: return null
+
+        return validateTypes(thenType, expectedType, ctx)
     }
 
-    private fun visitSucc(ctx: stellaParser.SuccContext): NatType? {
-        visitExpression(ctx.n, NatType) ?: return null
-        return NatType
+    private fun visitSucc(ctx: stellaParser.SuccContext, expectedType: IType?): IType? {
+        val result = visitExpression(ctx.n, NatType) ?: return null
+        validateTypes(result, NatType, ctx) ?: return null
+
+        return validateTypes(NatType, expectedType, ctx)
     }
 
-    private fun visitPred(ctx: stellaParser.PredContext): NatType? {
-        visitExpression(ctx.n, NatType) ?: return null
-        return NatType
+    private fun visitPred(ctx: stellaParser.PredContext, expectedType: IType?): IType? {
+        val result = visitExpression(ctx.n, NatType) ?: return null
+        validateTypes(result, NatType, ctx) ?: return null
+
+        return validateTypes(NatType, expectedType, ctx)
     }
 
-    private fun visitIsZero(ctx: stellaParser.IsZeroContext): BoolType? {
-        visitExpression(ctx.n, NatType) ?: return null
-        return BoolType
+    private fun visitIsZero(ctx: stellaParser.IsZeroContext, expectedType: IType?): IType? {
+        val result = visitExpression(ctx.n, NatType) ?: return null
+        validateTypes(result, NatType, ctx) ?: return null
+
+        return validateTypes(BoolType, expectedType, ctx)
     }
 
     private fun visitNatRec(ctx: stellaParser.NatRecContext, expectedType: IType?): IType? {
-       visitExpression(ctx.n, NatType)
+       val nType = visitExpression(ctx.n, NatType) ?: return null
+        validateTypes(nType, NatType, ctx.n) ?: return null
 
         val initialValueType = visitExpression(ctx.initial, expectedType) ?: return null
         val stepFunctionType = visitExpression(ctx.step, null) ?: return null
@@ -210,7 +220,7 @@ internal class TypeChecker(
             return null
         }
 
-        return initialValueType
+        return validateTypes(initialValueType, expectedType, ctx)
     }
 
     private fun visitAbstraction(ctx: stellaParser.AbstractionContext, expectedType: IType?): FunctionalType? {
@@ -269,7 +279,8 @@ internal class TypeChecker(
 //        }
 
         val arg = ctx.args.first()
-        visitExpression(arg, funType.from) ?: return null
+        val argType = visitExpression(arg, funType.from) ?: return null
+        validateTypes(argType, funType.from, ctx) ?: return null
 
         return validateTypes(resultType, expectedType, ctx)
     }
@@ -287,10 +298,10 @@ internal class TypeChecker(
             return null
         }
 
-        return validateTypes(type, expectedType, ctx)
+        return type
     }
 
-    private fun visitTuple(ctx: stellaParser.TupleContext, expectedType: IType?): TupleType? {
+    private fun visitTuple(ctx: stellaParser.TupleContext, expectedType: IType?): IType? {
         if (expectedType !is TupleType?) {
             val tupleType = visitTuple(ctx, null) ?: return null
 
@@ -308,7 +319,9 @@ internal class TypeChecker(
             return null
         }
 
-        return TupleType(contentTypes.filterNotNull())
+        val actualType = TupleType(contentTypes.filterNotNull())
+
+        return validateTypes(actualType, expectedType, ctx)
     }
 
     private fun visitDotTuple(ctx: stellaParser.DotTupleContext, expectedType: IType?): IType? {
@@ -416,7 +429,9 @@ internal class TypeChecker(
         letContext.saveVariableType(name, expressionType)
 
         val letTypeInferrer = TypeChecker(errorManager, letContext, extensionManager)
-        return letTypeInferrer.visitExpression(ctx.body, expectedType)
+        val result = letTypeInferrer.visitExpression(ctx.body, expectedType) ?: return null
+
+        return validateTypes(result, expectedType, ctx)
     }
 
     private fun visitTypeAsc(ctx: stellaParser.TypeAscContext, expectedType: IType?): IType? {
@@ -426,6 +441,17 @@ internal class TypeChecker(
         val expressionType = visitExpression(expression, expectedType ?: targetType) ?: return null
 
         if (expressionType != targetType) {
+            if (extensionManager.structuralSubtyping) {
+                errorManager.registerError(
+                    StellaErrorType.ERROR_UNEXPECTED_SUBTYPE,
+                    targetType,
+                    expressionType,
+                    context
+                )
+
+                return null
+            }
+
             errorManager.registerError(
                 StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
                 targetType,
@@ -469,6 +495,10 @@ internal class TypeChecker(
 
                     return null
                 }
+
+                for ((expTupleType, actTupleType) in expectedType.types.zip(actualType.types)) {
+                    validateTypes(actTupleType, expTupleType, expression) ?: return null
+                }
             }
 
             actualType is VariantType && expectedType is VariantType -> {
@@ -478,13 +508,43 @@ internal class TypeChecker(
                 if (!expectedLabels.containsAll(actualLabels)) {
                     errorManager.registerError(
                         StellaErrorType.ERROR_UNEXPECTED_VARIANT_LABEL,
-                        (expectedLabels - actualLabels.toSet()).first(),
+                        (expectedLabels - actualLabels.toSet()).firstOrNull() ?: "<none>",
                         expression,
                         actualType
                     )
 
                     return null
                 }
+
+                for ((actualVarLabel, actualVarType) in actualType.labels.zip(actualType.types)) {
+                    val expectedVarTypeIdx = expectedType.labels.indexOf(actualVarLabel)
+                    val expectedVarType = expectedType.types[expectedVarTypeIdx]
+
+                    if (validateTypes(actualVarType, expectedVarType, expression) == null) {
+                        return null
+                    }
+                }
+            }
+
+            actualType is SumType && expectedType is SumType -> {
+                if (
+                    validateTypes(actualType.left, expectedType.left, expression) == null
+                    || validateTypes(actualType.right, expectedType.right, expression) == null) {
+                    return null
+                }
+            }
+
+            actualType is FunctionalType && expectedType is FunctionalType -> {
+                if (
+                    validateTypes(expectedType.from, actualType.from, expression) == null
+                    || validateTypes(actualType.to, expectedType.to, expression) == null) {
+                    return null
+                }
+            }
+
+            actualType is ReferenceType && expectedType is ReferenceType -> {
+                validateTypes(expectedType.innerType, actualType.innerType, expression) ?: return null
+                validateTypes(actualType.innerType, expectedType.innerType, expression) ?: return null
             }
         }
 
@@ -626,7 +686,7 @@ internal class TypeChecker(
             return null
         }
 
-        return expressionType.to
+        return validateTypes(expressionType.to, expectedType, ctx)
     }
 
     private fun visitMatch(ctx: stellaParser.MatchContext, expectedType: IType?): IType? {
@@ -750,12 +810,14 @@ internal class TypeChecker(
             resultType = caseType
         }
 
-        return resultType
+        resultType ?: return null
+
+        return validateTypes(resultType, expectedType, ctx)
     }
 
     @Suppress("DuplicatedCode")
     private fun visitInl(ctx: stellaParser.InlContext, expectedType: IType?): IType? {
-        return if (expectedType == null && !extensionManager.structuralSubtyping) {
+        val result = if (expectedType == null && !extensionManager.structuralSubtyping) {
             errorManager.registerError(
                 StellaErrorType.ERROR_AMBIGUOUS_SUM_TYPE,
                 ctx
@@ -770,18 +832,24 @@ internal class TypeChecker(
 
             null
         } else if (expectedType != null && expectedType is SumType) {
-            visitExpression(ctx.expr_, expectedType.left) ?: return null
+            validateTypes(
+                visitExpression(ctx.expr_, expectedType.left) ?: return null,
+                expectedType.left,
+                ctx
+            ) ?: return null
 
             expectedType
         } else {
             val leftType = visitExpression(ctx.expr_, null) ?: return null
             SumType(leftType, BotType)
         }
+
+        return validateTypes(result ?: return null, expectedType, ctx)
     }
 
     @Suppress("DuplicatedCode")
     private fun visitInr(ctx: stellaParser.InrContext, expectedType: IType?): IType? {
-        return if (expectedType == null && !extensionManager.structuralSubtyping) {
+        val result = if (expectedType == null && !extensionManager.structuralSubtyping) {
             errorManager.registerError(
                 StellaErrorType.ERROR_AMBIGUOUS_SUM_TYPE,
                 ctx
@@ -796,13 +864,19 @@ internal class TypeChecker(
 
             null
         } else if (expectedType != null && expectedType is SumType) {
-            visitExpression(ctx.expr_, expectedType.right) ?: return null
+            validateTypes(
+                visitExpression(ctx.expr_, expectedType.right) ?: return null,
+                expectedType.right,
+                ctx
+            ) ?: return null
 
             expectedType
         } else {
             val rightType = visitExpression(ctx.expr_, null) ?: return null
             SumType(BotType, rightType)
         }
+
+        return validateTypes(result ?: return null, expectedType, ctx)
     }
 
     private fun visitVariant(ctx: stellaParser.VariantContext, expectedType: IType?): VariantType? {
@@ -848,9 +922,10 @@ internal class TypeChecker(
         val expectedExpressionType = expectedType.types[labelIndex]
 
         val expression = ctx.rhs
-        visitExpression(expression, expectedExpressionType)
+        val type = visitExpression(expression, expectedExpressionType) ?: return null
+        validateTypes(type, expectedExpressionType, ctx) ?: return null
 
-        return expectedType
+        return expectedType // todo?
     }
 
     private fun visitListContext(ctx: stellaParser.ListContext, expectedType: IType?): ListType? {
@@ -881,9 +956,22 @@ internal class TypeChecker(
         }
 
         val listType = (expectedType as ListType?)?.type ?: expressionTypes.firstOrNull { it != null } ?: BotType
-        val firstWrongTypedExpressionIndex = expressionTypes.indexOfFirst { it != listType }
+        val firstWrongTypedExpressionIndex = expressionTypes.indexOfFirst {
+            it?.isSubtypeOf(listType, extensionManager.structuralSubtyping) == false
+        }
 
         if (firstWrongTypedExpressionIndex != -1) {
+            if (extensionManager.structuralSubtyping) {
+                errorManager.registerError(
+                    StellaErrorType.ERROR_UNEXPECTED_SUBTYPE,
+                    listType,
+                    expressionTypes[firstWrongTypedExpressionIndex]!!,
+                    expressions[firstWrongTypedExpressionIndex]
+                )
+
+                return null
+            }
+
             errorManager.registerError(
                 StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
                 listType,
@@ -897,7 +985,7 @@ internal class TypeChecker(
         return ListType(listType)
     }
 
-    private fun visitConsList(ctx: stellaParser.ConsListContext, expectedType: IType?): ListType? {
+    private fun visitConsList(ctx: stellaParser.ConsListContext, expectedType: IType?): IType? {
         if (expectedType != null && expectedType !is ListType && expectedType !is TopType) {
             val listType = visitConsList(ctx, null) ?: return null
             errorManager.registerError(
@@ -918,9 +1006,11 @@ internal class TypeChecker(
 
         val resultType = ListType(headType)
         val tail = ctx.tail
-        visitExpression(tail, resultType) ?: return null
+        val tailType = visitExpression(tail, resultType) ?: return null
+        validateTypes(tailType, resultType, ctx) ?: return null
 
-        return resultType
+
+        return validateTypes(resultType, expectedType, ctx)
     }
 
     @Suppress("DuplicatedCode")
@@ -1007,7 +1097,9 @@ internal class TypeChecker(
     private fun visitSequence(ctx: stellaParser.SequenceContext, expectedType: IType?): IType? {
         visitExpression(ctx.expr1, UnitType) ?: return null
 
-        return visitExpression(ctx.expr2, expectedType)
+        val result = visitExpression(ctx.expr2, expectedType) ?: return null
+
+        return validateTypes(result, expectedType, ctx)
     }
 
     private fun visitRef(ctx: stellaParser.RefContext, expectedType: IType?): IType? {
@@ -1027,8 +1119,9 @@ internal class TypeChecker(
         } else null
 
         val innerType = visitExpression(ctx.expr_, innerExpectedType) ?: return null
+        validateTypes(innerType, innerExpectedType, ctx) ?: return null
 
-        return validateTypes(ReferenceType(innerType), expectedType, ctx)
+        return expectedType ?: ReferenceType(innerType)
     }
 
     private fun visitConstMemory(ctx: stellaParser.ConstMemoryContext, expectedType: IType?): IType? {
@@ -1057,6 +1150,10 @@ internal class TypeChecker(
     }
 
     private fun visitDeref(ctx: stellaParser.DerefContext, expectedType: IType?): IType? {
+        if (expectedType is TopType) {
+            return visitExpression(ctx.expr_, TopType)
+        }
+
         val expectedRefType = expectedType?.let { ReferenceType(it) }
         val refType = visitExpression(ctx.expr_, expectedRefType) ?: return null
 
@@ -1096,7 +1193,7 @@ internal class TypeChecker(
 
         val rhsType = visitExpression(ctx.rhs, null) ?: return null
 
-        if (lhsType.innerType != rhsType) {
+        if (rhsType.isNotSubtypeOf(lhsType.innerType, extensionManager.structuralSubtyping)) {
             errorManager.registerError(
                 StellaErrorType.ERROR_UNEXPECTED_TYPE_FOR_EXPRESSION,
                 lhsType.innerType,
@@ -1146,7 +1243,8 @@ internal class TypeChecker(
             return null
         }
 
-        visitExpression(ctx.expr_, exceptionType) ?: return null
+        val actualType = visitExpression(ctx.expr_, exceptionType) ?: return null
+        validateTypes(actualType, exceptionType, ctx) ?: return null
 
         return expectedType ?: BotType
     }
@@ -1165,7 +1263,7 @@ internal class TypeChecker(
         val mainType = visitExpression(ctx.tryExpr, expectedType) ?: return null
         visitExpression(ctx.fallbackExpr, mainType) ?: return null
 
-        return mainType
+        return validateTypes(mainType, expectedType, ctx)
     }
 
     @Suppress("DuplicatedCode")
@@ -1195,7 +1293,7 @@ internal class TypeChecker(
 
         newTypeChecker.visitExpression(ctx.fallbackExpr, expectedType) ?: return null
 
-        return mainType
+        return validateTypes(mainType, expectedType, ctx)
     }
 
     private fun visitTypeCast(ctx: stellaParser.TypeCastContext, expectedType: IType?): IType? {

@@ -19,18 +19,31 @@ fun IType.isSubtypeOf(other: IType, subtypingEnabled: Boolean): Boolean {
         }
 
         this is RecordType && other is RecordType -> {
-            // todo: check it
             val thisLabels = this.labels.zip(this.types).toSet()
-            val otherLabels = other.labels.zip(other.types).toSet()
 
-            thisLabels.containsAll(otherLabels)
+            if (!this.labels.toSet().containsAll(other.labels)) {
+                return false
+            }
+
+            val thisLabelsMap = thisLabels.toMap()
+
+            return other.labels.zip(other.types).toSet().all { (label, type) ->
+                thisLabelsMap[label]!!.isSubtypeOf(type, subtypingEnabled)
+            }
         }
 
         this is VariantType && other is VariantType -> {
-            val thisLabels = this.labels.zip(this.types).toSet()
             val otherLabels = other.labels.zip(other.types).toSet()
 
-            otherLabels.containsAll(thisLabels)
+            if (!other.labels.toSet().containsAll(this.labels)) {
+                return false
+            }
+
+            val otherLabelsMap = otherLabels.toMap()
+
+            return this.labels.zip(this.types).toSet().all { (label, type) ->
+                type.isSubtypeOf(otherLabelsMap[label]!!, subtypingEnabled)
+            }
         }
 
         this is TupleType && other is TupleType -> {
